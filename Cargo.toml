@@ -1,0 +1,35 @@
+[workspace]
+
+members = [
+    "contracts/*",
+    "packages/*",
+]
+
+resolver = "2"
+
+[workspace.package]
+version    = "0.0.1"
+edition    = "2021"
+authors    = [ "Kromsten <s@noreply.megarock.labs>" ]
+repository = "https://github.com/temp"
+
+[workspace.dependencies]
+cosmwasm-std     = { git = "https://github.com/scrtlabs/cosmwasm", tag = "v1.1.9-secret" }
+cosmwasm-storage = { git = "https://github.com/scrtlabs/cosmwasm", tag = "v1.1.9-secret" }
+secret-toolkit   = { git = "https://github.com/scrtlabs/secret-toolkit", tag = "v0.8.0", default-features = false, features = ["storage", "serialization", "utils", "permit", "viewing-key"] }
+cosmwasm-schema  = { version = "2.0.2" }
+thiserror        = { version = "1.0.31" }
+snafu            = { version = "0.8.2" }
+
+bech32           = { version = "0.11.0", default-features = false, features = ["alloc"] }
+sha2             = { version = "0.10.8", default-features = false } 
+
+
+
+[profile.release]
+rpath            = false
+lto              = true
+overflow-checks  = true
+opt-level        = 3
+debug            = false
+debug-assertions = false

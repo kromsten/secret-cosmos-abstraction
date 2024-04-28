@@ -1,0 +1,40 @@
+[package]
+name = "factory"
+version     = { workspace = true }
+edition     = { workspace = true }
+repository  = { workspace = true }
+authors     = { workspace = true }
+
+exclude = [
+  "contract.wasm",
+  "hash.txt",
+]
+
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[profile.release]
+opt-level = 3
+debug = false
+rpath = false
+lto = true
+debug-assertions = false
+codegen-units = 1
+panic = 'abort'
+incremental = false
+overflow-checks = true
+
+[features]
+default = []
+# for quicker tests, cargo test --lib
+# for more explicit tests, cargo test --features=backtraces
+#backtraces = ["cosmwasm-std/backtraces"]
+
+[dependencies]
+cosmwasm-std     = { workspace = true }
+cosmwasm-storage = { workspace = true }
+secret-toolkit   = { workspace = true }
+thiserror        = { workspace = true }
+cosmwasm-schema  = { workspace = true }
+snafu            = { workspace = true }

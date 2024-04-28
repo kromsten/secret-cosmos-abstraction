@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "InstantiateMsg",
+  "description": "Instantiation message",
+  "type": "object",
+  "required": [
+    "offspring_code_info"
+  ],
+  "properties": {
+    "offspring_code_info": {
+      "description": "offspring code info",
+      "allOf": [
+        {
+          "$ref": "#/definitions/CodeInfo"
+        }
+      ]
+    }
+  },
+  "definitions": {
+    "CodeInfo": {
+      "description": "Info needed to instantiate an offspring",
+      "type": "object",
+      "required": [
+        "code_hash",
+        "code_id"
+      ],
+      "properties": {
+        "code_hash": {
+          "description": "code hash of the stored offspring contract",
+          "type": "string"
+        },
+        "code_id": {
+          "description": "code id of the stored offspring contract",
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0.0
+        }
+      }
+    }
+  }
+}
