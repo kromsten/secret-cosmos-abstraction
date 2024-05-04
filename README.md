@@ -17,6 +17,108 @@ For security and modularity, it's recommended to separate authentication logic i
 The SDK includes message for interacting with an example proxy account contract and with a factory contract used for creating new accounts
 
 
+## Example Flow
+
+
+### 1. Generating a Signature
+
+To proof ownership of a Cosmos address, the user must sign a message using their private key. The message should be formatted according to the arbitrary signature [036](https://docs.cosmos.network/main/build/architecture/adr-036-arbitrary-signature) specification.
+
+The content of the message itself can be arbitrary, but it is good idea to include a timestamps and chain-id to prevent replay attacks. 
+A big message or data structure should cab hashed using SHA256 before signing. E.g.
+
+```typescript
+type DataToSign = {
+    msgs      :  CosmosMsg[],
+    chainId   :  string,
+    timestamp :  number,
+}
+
+
+const dataToSign = /* Populated Data */
+
+const message = sha256(JSON.stringify(dataToSign))
+```
+
+
+Example of generating an arbitary signature [with Keplr](https://docs.keplr.app/api/#request-signature-for-arbitrary-message):
+
+```typescript
+const signature = await signArbitrary(chainId, signer, message)
+```
+
+To verify the signature on contract side we must `dataToSign`, `signature` and `pubkey` of the signer. Additionally to generate the correct prefix for the address we ether must pass `hrp` of the chain or the `signer` address itself as additional parameter.
+
+
+### 2. Authenticating / Creating Proxy Account
+
+Using the signature and the rest of the authenticating primitives, the user can authenticate themselves on a contract of a dapp or to create a separate proxy account contract only controlled by the provided credentials.
+
+To avoid generating a new signature every time, the contract can generate a session key that can be used to authenticate the user in future interactions and also to view the private state of the contract. A contract can return the newly generated session key in encrypted logs (ether with help of VM or using public key of the user) 
+
+Calling the contract with a session key can look like this:
+
+```typescript
+const execute_msg =  {
+    with_session_key: {
+        msg: { wasm_msg: { execute: {...} }}
+        session_key: "session_key",
+    }
+}
+```
+
+#### First Interaction
+Operations on Secret Network require gas paid from a secret address we need a relayer to authenticate / create a proxy on behalf of a Cosmos user. 
+
+Since the calling address is not used for authentication, the action can be subsidized by a dapp or a public community relayer
+
+Another option is to use an IBC relayers e.g. Polyton or simply using IBC-Hooks. Keep in mind that payload including signature are first submiited to a remote chain which might not be encrypted
+
+For subsequent interactions a client application can generate a local (e.g. browser local storage) wallet used for interacting with Secret Network behind the scenes. An proxy account contract might issue a feegrant so that the wallet can use the contract's funds for gas payments. 
+
+### 3. Funding and Forwarding
+
+Fees for executing transactions on Secret Network are paid in SCRT. In case of a local in-browser wallet must have some itself or alternatively a proxy account contract that issues a feegrant must have them
+
+Getting SCRT to the wallet can be done in seemless manner in various ways. 
+
+With IBC-Hooks mentioned earlier a user can send ibc/denom version of SCRT tokens on a remote chain and send them together with payload as a part of normal ics20 message
+
+Another viable options is to send a different denom of a remote chain in similar manner and swap it for SCRT behind the scenes e.g. using Shade Protocol, Sienna, etc
+
+Funding can be done atomically with a multi-message transaction (e.g. first message for swapping and the second for creating a funded proxy account over IBC-Hook).
+
+Given there is a relayer for a first operation a funding is not required for authentication or creating an account per se. It can be done later at any point in time.
+
+### 4. Executing Actions
+
+All steps described actions above might be integrating into any smart contract and tailored to the specific needs of the dapp.
+
+The most simple approach covering most of the use cases is to use a separate proxy account contract and use it as an entrypoint for interacting with any other contract / dapp on Secret Network.
+
+A message for interacting with a remote contract through a proxy account can look like this:
+
+```typescript
+const execute_msg =  {
+    // or `with_auth_data`
+    with_session_key: {
+        msg: { 
+            cosmos_msg: { 
+                wasm: {
+                    execute: {
+                        contract_addr: "remote contract address",
+                        code_hash: "remote contract code hash",
+                        msg: "binary message of action on remote contract",
+                        funds: [{ coin1 }, { coin2 }]
+                    }
+                }
+        }}
+        session_key: "session_key",
+    }
+}
+```
+
+
 ## Data Structures
 
 ### SessionConfig
@@ -68,10 +170,23 @@ struct CosmosAuthData {
 }
 ```
 
+### FundForwarding
+
+Example with Squid Router inspired calls
+```rust
+struct Call<A = CallAction> {
+    /// cosmos message to execute
+    msg: CosmosMsg,
+    /// actions to perfirm bebore the cosmos message
+    actions: Vec<A>,
+}
+```
+
 
 ```rust
 struct FundForwarding {
-    // ToBeDefined
+    /// list of calls to execute 
+    calls: Vec<Call>,
 }
 ```
 
@@ -81,13 +196,13 @@ struct FundForwarding {
 A proxy configuration for handling authentication and subsequent actions.
 
 ```rust
-struct CosmosProxy {
+struct CosmosProxy<F = FundForwarding> {
     /// Parameters for abstract interaction settings.
     abstraction_params: AbstractionParams,
     /// Authentication and authorization data.
     auth_data: CosmosAuthData,
     /// Fund forwarding configuration.
-    fund_forwarding: Option<FundForwarding>,
+    fund_forwarding: Option<F>,
     /// Optional payload to execute immediately after authentication.
     payload: Option<Binary>
 }
@@ -139,14 +254,13 @@ Manages authentication, execution of delegated actions, and key management.
 
 ```rust
 enum AccountExecuteMsg<T = Empty> {
-    /// Authenticate and optionaly generate abstraction primitivas with optional action payload.
-    Authenticate(CosmosProxy),
+
     /// Authenticates using provided auth data and executes a given message.
     WithAuthData {
-        msg: AuthorisedExecuteMsg<T>,
-        auth_data: CosmosAuthData,
-        padding: Option<String>,
-        gas_target: Option<String>,
+        msg          :   AuthorisedExecuteMsg<T>,
+        auth_data    :   CosmosAuthData,
+        padding      :   Option<String>,
+        gas_target   :   Option<String>,
     },
      /// authenticate and execute a payload with a session key
     WithSessionKey {
