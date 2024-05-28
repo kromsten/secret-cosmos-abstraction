@@ -1,0 +1,62 @@
+version: '3.8'
+services:
+
+  localsecret:
+    build:
+      context: ./dockerbuilds
+      dockerfile: Dockerfile.secret
+    image: localsecret
+    container_name: ls-1
+    environment:
+        CHAINID: "test-1"
+        FAST_BLOCKS: "true"
+        LOG_LEVEL: "TRACE"
+    ports:
+      - 1317:1317
+      - 26657:26657
+      - 26656:26656
+      - 8090:9090
+      - 5000:5000
+    networks:
+      - sdk-test
+
+  localsecret-2:
+    build:
+      context: ./dockerbuilds
+      dockerfile: Dockerfile.secret
+    image: localsecret
+    container_name: ls-2
+    environment:
+        CHAINID: test-2
+        FAST_BLOCKS: "true"
+        LOG_LEVEL: "TRACE"
+    ports:
+      - 2317:1317
+      - 36657:26657
+      - 36656:26656
+      - 9090:9090
+      - 5001:5000
+    networks:
+      - sdk-test
+
+  hermes:
+    build:
+      context: ./dockerbuilds
+      dockerfile: Dockerfile.hermes
+    image: hermes
+    container_name: hermes
+    depends_on:
+      - "localsecret"
+      - "localsecret-2"
+    networks:
+      - sdk-test
+
+volumes:
+  data:
+    name: sdk-test-data
+    external: false
+
+networks:
+  bazaar:
+    name: sdk-test
+    external: false

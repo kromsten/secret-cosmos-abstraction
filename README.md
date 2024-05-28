@@ -158,15 +158,15 @@ struct AbstractionParams {
 Data used for user authentication and transaction authorization.
 
 ```rust
-struct CosmosAuthData {
+struct CosmosCredential {
     /// Public key corresponding to the user's secret key used for signing.
-    pubkey: Binary,
+    pubkey      : Binary,
     /// Signed SHA256 digest of a message formatted according to 036.
-    signature: Binary,
+    signature   : Binary,
     /// Original message before wrapping and signing.
-    message: String,
+    message     : Binary,
     /// Bech32 address prefix.
-    hrp: Option<String>
+    hrp         : Option<String>
 }
 ```
 
@@ -196,11 +196,11 @@ struct FundForwarding {
 A proxy configuration for handling authentication and subsequent actions.
 
 ```rust
-struct CosmosProxy<F = FundForwarding> {
+struct CosmosProxy<C = CosmosCredential, F = FundForwarding> {
     /// Parameters for abstract interaction settings.
     abstraction_params: AbstractionParams,
     /// Authentication and authorization data.
-    auth_data: CosmosAuthData,
+    credentials:  C[],
     /// Fund forwarding configuration.
     fund_forwarding: Option<F>,
     /// Optional payload to execute immediately after authentication.
