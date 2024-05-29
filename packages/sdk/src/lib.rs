@@ -45,7 +45,7 @@ pub struct CosmosAuthData {
     /// signed sha256 digest of a message wrapped in arbitary data (036) object
     pub signature :   Binary,
     /// signed inner message before being wrapped
-    pub message   :   String,
+    pub message   :   Binary,
     /// prefix for the bech32 address on remote cosmos chain
     pub hrp       :   Option<String>
 }

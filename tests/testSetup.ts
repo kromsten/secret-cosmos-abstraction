@@ -1,7 +1,8 @@
-import { setup, settingUp } from "../src/setup";
+import { contractConfigExists, ibcConfigExists } from "../src/config";
+import { setup  } from "../src/setup";
 
 
-if (!settingUp) {
+if (!ibcConfigExists() || !contractConfigExists()) {
     console.log("Running test setup...");
     await setup();
 }

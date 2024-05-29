@@ -67,13 +67,9 @@ const setupIbc = async () => {
 }
 
 
-export let settingUp = false;
 
 
 export const setup = async () => {
-
-    if (settingUp) return;
-    settingUp = true;
 
     if (!ibcConfigExists()) {
         if (!(await setupIbc())) {
@@ -87,8 +83,6 @@ export const setup = async () => {
     if (!contractConfigExists()) {
         await instantiateContracts();
     }
-
-    settingUp = false;
 }
 
 

@@ -4,7 +4,7 @@ import { sha256 } from "@noble/hashes/sha256";
 import { toHex, MsgStoreCodeParams, TxResultCode } from "secretjs"
 import { codeConfigExists, codeConfigFileExists, contractConfigFileExists, loadCodeConfig, loadContractConfig, loadIbcConfig, saveCodeConfig, saveContractConfig } from "./config";
 import { secretClient } from "./clients";
-import { CodeConfig, ContractConfig, TokenData } from "./types";
+import { CodeConfig, ContractConfig } from "./types";
 import { SECRET_TOKEN } from "./env";
 import { instantiateRegistry } from "./registry";
 import { instantiateSnip20 } from "./snip20";

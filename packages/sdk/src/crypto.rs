@@ -1,37 +1,26 @@
-use bech32::{Bech32, Hrp};
-use ripemd::Ripemd160;
-use cosmwasm_std::{Api, StdError, StdResult};
-use sha2::{Digest, Sha256};
 use crate::CosmosAuthData;
+use cosmwasm_std::{Api, StdError, StdResult, CanonicalAddr, Binary};
+use secret_toolkit::crypto::sha_256;
+use bech32::{Bech32, Hrp};
 
 
-pub fn ripemd160(bytes: &[u8]) -> Vec<u8> {
-    let mut hasher = Ripemd160::new();
-    hasher.update(bytes);
-    hasher.finalize().to_vec()
-}
-
-pub fn sha256(msg: &[u8]) -> Vec<u8> {
-    let mut hasher = Sha256::new();
-    hasher.update(msg);
-    hasher.finalize().to_vec()
-}
+pub mod utils;
+use utils::ripemd160;
 
 
 pub fn pubkey_to_account(pubkey: &[u8], hrp: &str) -> StdResult<String> {
-    let base32_addr = ripemd160(&sha256(pubkey));
+    let bech32_addr = ripemd160(&sha_256(pubkey));
     let account: String = bech32::encode::<Bech32>(
         Hrp::parse(hrp).map_err(|e| StdError::generic_err(e.to_string()))?,
-        &base32_addr
+        &bech32_addr
     ).unwrap();
     Ok(account)
 }
 
 
-pub fn pubkey_to_canonical(pubkey: &[u8]) -> cosmwasm_std::CanonicalAddr {
-    cosmwasm_std::CanonicalAddr::from(
-        cosmwasm_std::Binary(ripemd160(&sha256(pubkey)))
-    )
+pub fn pubkey_to_canonical(pubkey: &[u8]) -> CanonicalAddr {
+    let bech32_addr = ripemd160(&sha_256(pubkey));
+    CanonicalAddr(Binary(bech32_addr))
 }
 
 
@@ -45,13 +34,16 @@ pub fn preamble_msg_arb_036(signer: &str, data: &str) -> String {
 
 
 pub fn verify_arbitrary(api:  &dyn Api, auth: CosmosAuthData) -> StdResult<()> {
-    let canonical = pubkey_to_canonical(&auth.pubkey);
-    let addr = api.addr_humanize(&canonical)?;
+
+    let addr = match auth.hrp {
+        Some(hrp) => pubkey_to_account(&auth.pubkey, &hrp)?,
+        None => api.addr_humanize(&pubkey_to_canonical(&auth.pubkey))?.to_string()
+    };  
     
-    let digest = sha256(
+    let digest = sha_256(
         &preamble_msg_arb_036(
             addr.as_str(), 
-            auth.message.as_str()
+            auth.message.to_base64().as_str()
         ).as_bytes()
     );
 
@@ -67,3 +59,7 @@ pub fn verify_arbitrary(api:  &dyn Api, auth: CosmosAuthData) -> StdResult<()> {
 
     Ok(())
 }
+
+
+#[cfg(test)]
+mod tests;
