@@ -8,7 +8,6 @@ use cw_utils::Expiration;
 
 
 
-
 #[cw_serde]
 pub struct SessionConfig {
     /// if true, the contract generate a session key that can be used to bypass need for supplying a signature

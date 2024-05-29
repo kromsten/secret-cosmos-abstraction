@@ -7,6 +7,8 @@ const SIGNATURE : &str = "x9jjSFv8/n1F8gOSRjddakYDbvroQm8ZoDWht/Imc1t5xUW49+Xaq7
 const PUBKEY : &str = "A08EGB7ro1ORuFhjOnZcSgwYlpe0DSFjVNUIkNNQxwKQ";
 const HRP : &str = "cosmos";
 
+
+
 #[test]
 fn test_pubkey_to_account() {
     // correct
@@ -29,10 +31,12 @@ fn test_pubkey_to_account() {
 
 
 
+
 #[test]
 fn test_036_verification() {
     let deps = mock_dependencies();
 
+    // all correct
     let auth = CosmosAuthData {
         signature: Binary::from_base64(SIGNATURE).unwrap(),
         message: Binary::from_base64(MSG).unwrap(),
@@ -41,6 +45,45 @@ fn test_036_verification() {
     };
 
     assert!(verify_arbitrary(&deps.api, auth).is_ok());
+
+
+    // wrong signature
+    let auth = CosmosAuthData {
+        signature: Binary::from_base64("d3Jvbmc=").unwrap(),
+        message: Binary::from_base64(MSG).unwrap(),
+        pubkey: Binary::from_base64(PUBKEY).unwrap(),
+        hrp: Some(HRP.to_string())
+    };
+    assert!(verify_arbitrary(&deps.api, auth).is_err());
+
+
+    // wrong message
+    let auth = CosmosAuthData {
+        signature: Binary::from_base64(SIGNATURE).unwrap(),
+        message: Binary::from_base64("d3Jvbmc=").unwrap(),
+        pubkey: Binary::from_base64(PUBKEY).unwrap(),
+        hrp: Some(HRP.to_string())
+    };
+    assert!(verify_arbitrary(&deps.api, auth).is_err());
+
+
+    // wrong pubkey
+    let auth = CosmosAuthData {
+        signature: Binary::from_base64(SIGNATURE).unwrap(),
+        message: Binary::from_base64(MSG).unwrap(),
+        pubkey: Binary::from_base64("d3Jvbmc=").unwrap(),
+        hrp: Some(HRP.to_string())
+    };
+    assert!(verify_arbitrary(&deps.api, auth).is_err());
+
+    // different hrp
+    let auth = CosmosAuthData {
+        signature: Binary::from_base64(SIGNATURE).unwrap(),
+        message: Binary::from_base64(MSG).unwrap(),
+        pubkey: Binary::from_base64(PUBKEY).unwrap(),
+        hrp: Some("secret".to_string())
+    };
+    assert!(verify_arbitrary(&deps.api, auth).is_err());
 }
 
 

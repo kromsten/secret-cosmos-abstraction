@@ -32,7 +32,6 @@ pub fn preamble_msg_arb_036(signer: &str, data: &str) -> String {
 }
 
 
-
 pub fn verify_arbitrary(api:  &dyn Api, auth: CosmosAuthData) -> StdResult<()> {
 
     let addr = match auth.hrp {

@@ -16,28 +16,24 @@ describe('Account Creation', () => {
          
         await createAccount(
             public_acc_creds,
-            "user_id",
-            true
         ) 
 
         it("should be possible to query an account publicly", async () => {
             let res : any = await getAccountInfo({ account_id: "0" })
             expect(res.contract_address).toBeDefined();
 
-            res = await getAccountInfo({ account_id: "0", extension: { full_info: true} })
+            res = await getAccountInfo({ account_id: "0" })
             expect(res as string).toContain("not found")
 
             res = await getAccountInfo({ credential_id: public_acc_creds[0].pubkey })
             expect(res.contract_address).toBeDefined();
 
-            res = await getAccountInfo({ extension: { user_id: "user_id" } })
-            expect(res.contract_address).toBeDefined();
         });
 
         it("should be possible to query full info with auth", async () => {
 
             const res : any  = await getAccountInfoWithAuth(
-                { account_id: "0", extension: { full_info: true }},
+                { account_id: "0" },
                 public_acc_creds
             )
             console.log("Account info: ", res);
