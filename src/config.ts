@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync, existsSync } from "fs";
 import { CodeConfig, ContractConfig, IbcConfig } from "./types";
 
-export const CONFIG_DIR = './configs';
+export const CONFIG_DIR = 'configs';
 export const CODE_FILE = 'codes.json';
 export const CONTRACTS_FILE = 'contracts.json';
 export const IBC_FILE = 'ibc.json';

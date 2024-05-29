@@ -2,7 +2,6 @@ import { MsgExecuteContractParams, MsgInstantiateContractParams, MsgInstantiateC
 import { AccountQuery, Contract, CosmosCredential, RegistryExecuteMsg, RegistryInitMsg, RegistryQueryMsg } from "./types";
 import { loadCodeConfig, loadContractConfig } from "./config";
 import { secretClient } from "./clients";
-import { getTokenData } from "./contracts";
 import { SECRET_CHAIN_ID } from "./env";
 
 
@@ -14,7 +13,6 @@ export const instantiateRegistry = async () : Promise<Contract> => {
 
     const init_msg : RegistryInitMsg = {
         allowed_code_ids  : [config.account!.code_id],
-        token_data        :  getTokenData()
     }
 
 

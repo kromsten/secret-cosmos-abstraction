@@ -41,6 +41,7 @@ describe('Env, IBC and Contract setup', () => {
         })
 
         it("should have addresses", async () => {
+            expect(codeConfigExists()).toBe(true);
             expect(contractConfigExists()).toBe(true);
             const codeConfig  = loadCodeConfig();
             const contracts = loadContractConfig();

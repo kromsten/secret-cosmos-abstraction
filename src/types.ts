@@ -110,9 +110,7 @@ export type AccountInitMsg = CosmosProxyMsg
 
 
 export type RegistryInitMsg = {
-    token_data               :       TokenData,
     allowed_code_ids         :       number[],
-    max_fee_grant_amount?    :       string,
     admin?                   :       string
 }
 

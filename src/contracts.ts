@@ -2,7 +2,7 @@
 import { readFileSync, readdirSync } from "fs"
 import { sha256 } from "@noble/hashes/sha256";
 import { toHex, MsgStoreCodeParams, TxResultCode } from "secretjs"
-import { codeConfigFileExists, contractConfigFileExists, loadCodeConfig, loadContractConfig, loadIbcConfig, saveCodeConfig, saveContractConfig } from "./config";
+import { codeConfigExists, codeConfigFileExists, contractConfigFileExists, loadCodeConfig, loadContractConfig, loadIbcConfig, saveCodeConfig, saveContractConfig } from "./config";
 import { secretClient } from "./clients";
 import { CodeConfig, ContractConfig, TokenData } from "./types";
 import { SECRET_TOKEN } from "./env";
@@ -12,7 +12,7 @@ import { sleep } from "./utils";
 
 
 export const uploadContracts = async (
-    wasmDirPath: string = "./artifacts"
+    wasmDirPath: string = "artifacts"
 ) => {
     console.log("Uploading contracts...");
 
@@ -63,24 +63,12 @@ export const uploadContracts = async (
        
         saveCodeConfig(config);
     }
-}
 
-
-
-export const getTokenData = () : TokenData => {
-
-    const ibc = loadIbcConfig();
-    const contracts = loadContractConfig();
-
-    return {
-        sscrt_contract: {
-            address: contracts.sscrt!.address,
-            hash: contracts.sscrt!.hash
-        },
+    if (!codeConfigExists()) {
+        throw new Error("No contracts to upload. Make sure the .wasm files are in " 
+            + wasmDirPath + " directory");
     }
 }
-
-
 
 export const instantiateContracts = async () => {
     const config : ContractConfig = contractConfigFileExists() 

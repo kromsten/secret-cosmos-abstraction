@@ -57,6 +57,6 @@ volumes:
     external: false
 
 networks:
-  bazaar:
+  sdk-test:
     name: sdk-test
     external: false
