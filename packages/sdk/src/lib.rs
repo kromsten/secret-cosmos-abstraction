@@ -1,10 +1,11 @@
+pub mod types;
 pub mod crypto;
 pub mod factory;
 pub mod account;
 
 use cosmwasm_schema::cw_serde;
 use cosmwasm_std::Binary;
-use cw_utils::Expiration;
+use types::Expiration;
 
 
 

@@ -4,7 +4,6 @@ import { loadCodeConfig, loadContractConfig } from "./config";
 import { secretClient } from "./clients";
 import { SECRET_CHAIN_ID } from "./env";
 
-
 export const instantiateRegistry = async () : Promise<Contract> => {
     
     const config = loadCodeConfig();
@@ -15,7 +14,7 @@ export const instantiateRegistry = async () : Promise<Contract> => {
         allowed_code_ids  : [config.account!.code_id],
     }
 
-
+    
 
     const msg : MsgInstantiateContractParams = {
         code_id: code.code_id,
@@ -79,7 +78,6 @@ export const createAccount = async (
     const tx = await secretClient.tx.compute.executeContract(msg, { gasLimit: 900_000 });
 
     console.log("Create account tx: ", tx);
-
 
     return tx;
 }
