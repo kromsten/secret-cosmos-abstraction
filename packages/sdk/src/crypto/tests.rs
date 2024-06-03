@@ -12,18 +12,18 @@ const SIGN_HRP : &str = "cosmos";
 #[test]
 fn test_pubkey_to_account() {
     // correct
-    assert_eq!(pubkey_to_account(
+    assert_eq!(pubkey_to_address(
         Binary::from_base64(SIGNING_PUBKEY).unwrap().as_slice(),
         SIGN_HRP
     ).unwrap(), SIGNER);
 
     // works but incorrect
-    assert_ne!(pubkey_to_account(
+    assert_ne!(pubkey_to_address(
         Binary::from_base64(SIGNING_PUBKEY).unwrap().as_slice(),
         "secret"
     ).unwrap(), SIGNER);
 
-    assert_ne!(pubkey_to_account(
+    assert_ne!(pubkey_to_address(
         b"some other key",
         SIGN_HRP
     ).unwrap(), SIGNER);
@@ -37,51 +37,51 @@ fn test_036_verification() {
     let deps = mock_dependencies();
 
     // all correct
-    let auth = CosmosAuthData {
+    let cred = CosmosCredential {
         signature: Binary::from_base64(SIGNATURE).unwrap(),
-        message: Binary::from_base64(SIGNED_MSG).unwrap(),
+        message: SIGNED_MSG,
         pubkey: Binary::from_base64(SIGNING_PUBKEY).unwrap(),
         hrp: Some(SIGN_HRP.to_string())
     };
 
-    assert!(verify_arbitrary(&deps.api, auth).is_ok());
+    assert!(verify_arbitrary(&deps.api, &cred).is_ok());
 
     // wrong signature
-    let auth = CosmosAuthData {
+    let cred2 = CosmosCredential {
         signature: Binary::from_base64("d3Jvbmc=").unwrap(),
         message: Binary::from_base64(SIGNED_MSG).unwrap(),
         pubkey: Binary::from_base64(SIGNING_PUBKEY).unwrap(),
         hrp: Some(SIGN_HRP.to_string())
     };
-    assert!(verify_arbitrary(&deps.api, auth).is_err());
+    assert!(verify_arbitrary(&deps.api, &cred2).is_err());
 
 
     // wrong message
-    let auth = CosmosAuthData {
+    let cred3 = CosmosCredential {
         signature: Binary::from_base64(SIGNATURE).unwrap(),
         message: Binary::from_base64("d3Jvbmc=").unwrap(),
         pubkey: Binary::from_base64(SIGNING_PUBKEY).unwrap(),
         hrp: Some(SIGN_HRP.to_string())
     };
-    assert!(verify_arbitrary(&deps.api, auth).is_err());
+    assert!(verify_arbitrary(&deps.api, &cred3).is_err());
 
     // wrong pubkey
-    let auth = CosmosAuthData {
+    let cred4 = CosmosCredential {
         signature: Binary::from_base64(SIGNATURE).unwrap(),
         message: Binary::from_base64(SIGNED_MSG).unwrap(),
         pubkey: Binary::from_base64("d3Jvbmc=").unwrap(),
         hrp: Some(SIGN_HRP.to_string())
     };
-    assert!(verify_arbitrary(&deps.api, auth).is_err());
+    assert!(verify_arbitrary(&deps.api, &cred4).is_err());
 
     // different hrp
-    let auth = CosmosAuthData {
+    let cred5 = CosmosCredential {
         signature: Binary::from_base64(SIGNATURE).unwrap(),
         message: Binary::from_base64(SIGNED_MSG).unwrap(),
         pubkey: Binary::from_base64(SIGNING_PUBKEY).unwrap(),
         hrp: Some("secret".to_string())
     };
-    assert!(verify_arbitrary(&deps.api, auth).is_err());
+    assert!(verify_arbitrary(&deps.api, &cred5).is_err());
 }
 
 

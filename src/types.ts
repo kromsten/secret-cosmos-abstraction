@@ -91,6 +91,7 @@ export type AbstractionParams = {
 export type CosmosProxyMsg = {
     abstraction_params          :       AbstractionParams,
     auth_data                   :       CosmosAuthData,
+    extension                   :       {}
 }
 
 

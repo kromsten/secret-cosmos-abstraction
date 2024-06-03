@@ -16,7 +16,8 @@ describe('Account Creation', () => {
          
         /* await createAccount(
             public_acc_creds,
-        )  */
+        ) */
+        
 
         it("shouldn't be possible to query an account without creds", async () => {
             let res : any = await getAccountInfo({ account_id: "0" })
@@ -24,7 +25,6 @@ describe('Account Creation', () => {
             
             res = await getAccountInfo({ credential_id: public_acc_creds[0].pubkey })
             expect(res as string).toContain("not found")
-
         });
 
 

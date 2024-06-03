@@ -1,8 +1,8 @@
-use crate::CosmosAuthData;
+use crate::CosmosCredential;
 use cosmwasm_std::{Api, StdError, StdResult, CanonicalAddr, Binary};
 use secret_toolkit::crypto::sha_256;
 use bech32::{Bech32, Hrp};
-use std::ops::Deref;
+use std::{ops::Deref, fmt::Display};
 use chacha20poly1305::{ChaCha20Poly1305, Nonce, aead::Aead, KeyInit};
 
 
@@ -14,7 +14,7 @@ use utils::{ripemd160, preamble_msg_arb_036};
 /// @param pubkey: &[u8] - The public key to convert.
 /// @param hrp: &str - The human readable prefix to use.
 /// @returns String - bech32 encoded account address
-pub fn pubkey_to_account(pubkey: &[u8], hrp: &str) -> StdResult<String> {
+pub fn pubkey_to_address(pubkey: &[u8], hrp: &str) -> StdResult<String> {
     let bech32_addr = ripemd160(&sha_256(pubkey));
     let account: String = bech32::encode::<Bech32>(
         Hrp::parse(hrp).map_err(|e| StdError::generic_err(e.to_string()))?,
@@ -36,23 +36,19 @@ pub fn pubkey_to_canonical(pubkey: &[u8]) -> CanonicalAddr {
 
 /// Verifies an arbitrary message (036) using passed public key, signature
 /// and human readable prefix.
-pub fn verify_arbitrary(api: &dyn Api, auth: CosmosAuthData) -> StdResult<()> {
-    let addr = match auth.hrp {
-        Some(hrp) => pubkey_to_account(&auth.pubkey, &hrp)?,
-        None => api.addr_humanize(&pubkey_to_canonical(&auth.pubkey))?.to_string()
-    };  
+pub fn verify_arbitrary<M : Display>(api:  &dyn Api, cred: &CosmosCredential<M>) -> StdResult<()> {
     
     let digest = sha_256(
         &preamble_msg_arb_036(
-            addr.as_str(), 
-            auth.message.to_base64().as_str()
+            cred.address(api)?.as_str(), 
+            cred.message.to_string().as_str()
         ).as_bytes()
     );
 
     let res = api.secp256k1_verify(
         &digest,
-        &auth.signature,
-        &auth.pubkey
+        &cred.signature,
+        &cred.pubkey
     )?;
 
     if !res {
@@ -61,6 +57,8 @@ pub fn verify_arbitrary(api: &dyn Api, auth: CosmosAuthData) -> StdResult<()> {
 
     Ok(())
 }
+
+
 
 
 
@@ -82,6 +80,9 @@ pub fn chacha20poly1305_decrypt(
     Ok(plaintext)
 }
 
+
+#[cfg(feature = "wallets")]
+pub mod wallets;
 
 
 #[cfg(test)]

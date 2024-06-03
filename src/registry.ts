@@ -63,6 +63,7 @@ export const createAccount = async (
                 auth_data: {
                     credentials,
                 },
+                extension: {}
             }
         }
     }

@@ -7,6 +7,15 @@ use secret_toolkit::{
 
 use crate::structs::{CodeInfo, StoreOffspringInfo};
 
+
+
+pub const ALLOWED_CODE_IDS  :    Item<Vec<u64>>          =     Item::new(b"acids");
+
+
+pub const TEST              :    Item<String>            =     Item::new(b"testt");
+
+
+
 /// pad handle responses and log attributes to blocks of 256 bytes to prevent leaking info based on
 /// response size
 pub const BLOCK_SIZE: usize = 256;

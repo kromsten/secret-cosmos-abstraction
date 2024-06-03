@@ -1,5 +1,5 @@
 [package]
-name = "factory"
+name = "registry"
 version     = { workspace = true }
 edition     = { workspace = true }
 repository  = { workspace = true }
@@ -38,3 +38,4 @@ secret-toolkit   = { workspace = true }
 thiserror        = { workspace = true }
 cosmwasm-schema  = { workspace = true }
 snafu            = { workspace = true }
+sdk              = { workspace = true, features=["registry"]}

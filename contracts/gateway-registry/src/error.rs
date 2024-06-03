@@ -12,6 +12,9 @@ pub enum ContractError {
     #[error("Unauthorized")]
     Unauthorized {},
 
+    #[error("List of allowed code ids cannot be empty")]
+    EmptyAllowedCodeIds {},
+
     #[error("This address is unauthorized and/or viewing key is not valid")]
     ViewingKeyOrUnauthorized {},
 
