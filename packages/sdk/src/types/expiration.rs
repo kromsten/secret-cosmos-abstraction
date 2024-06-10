@@ -63,7 +63,6 @@ impl Add<Duration> for Expiration {
     }
 }
 
-// TODO: does this make sense? do we get expected info/error when None is returned???
 impl PartialOrd for Expiration {
     fn partial_cmp(&self, other: &Expiration) -> Option<Ordering> {
         match (self, other) {

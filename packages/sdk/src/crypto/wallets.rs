@@ -101,7 +101,7 @@ pub struct SecretFeegrantWallet {
 
 
 #[cw_serde]
-pub struct SecretEncryptingWallet {
+pub struct SecretEncryptionWallet {
     pub private_key: Binary,
     pub public_key: Binary,
 }
@@ -122,9 +122,9 @@ impl Into<SecretFeegrantWallet> for SecretWallet {
     }
 }
 
-impl Into<SecretEncryptingWallet> for SecretWallet {
-    fn into(self) -> SecretEncryptingWallet {
-        SecretEncryptingWallet {
+impl Into<SecretEncryptionWallet> for SecretWallet {
+    fn into(self) -> SecretEncryptionWallet {
+        SecretEncryptionWallet {
             private_key: self.private_key,
             public_key: self.public_key,
         }
@@ -133,7 +133,7 @@ impl Into<SecretEncryptingWallet> for SecretWallet {
 
 
 
-impl TryInto<Secp256k1Wallet> for SecretEncryptingWallet {
+impl TryInto<Secp256k1Wallet> for SecretEncryptionWallet {
     type Error = StdError;
 
     fn try_into(self) -> Result<Secp256k1Wallet, Self::Error> {
@@ -147,7 +147,7 @@ impl TryInto<Secp256k1Wallet> for SecretEncryptingWallet {
 }
 
 
-impl SecretEncryptingWallet {
+impl SecretEncryptionWallet {
 
     pub fn decryption_key(
         &self, 

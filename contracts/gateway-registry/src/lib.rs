@@ -2,4 +2,5 @@ pub mod contract;
 pub mod error;
 pub mod msg;
 pub mod state;
-pub mod structs;
+mod structs;
+mod query;

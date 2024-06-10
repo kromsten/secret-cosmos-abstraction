@@ -66,7 +66,9 @@ pub enum RegistryQueryMsg<I = Binary, A = CosmosAuthData, Q = CosmosAccountQuery
     where  I: JsonSchema + Clone + Serialize, A: JsonSchema, E: JsonSchema, Q: JsonSchema
 {
     // Public endpoint for querying account information for public accounts
-    AccountInfo(Q),
+    AccountInfo {
+        query        :   Q,
+    },
 
     // Encryption key of the registry contract to send encrypted messages e.g. over IBC
     EncryptionKey  {},
@@ -91,7 +93,25 @@ pub enum RegistryQueryMsg<I = Binary, A = CosmosAuthData, Q = CosmosAccountQuery
         query        :   I,
     },
 
+    Encrypted {
+        query        :   Binary,
+        public_key   :   Binary,
+        nonce        :   Binary,
+    },
+
     Extension {
         query        :   E
     },
 }
+
+
+#[cw_serde]
+pub struct AccountInfoResponseBase<I> 
+    where I: Serialize + ?Sized
+{
+    pub  contract_address   :   String,
+    pub  code_hash          :   Option<String>,
+    pub  info               :   I
+}
+
+pub type AccountInfoResponse = AccountInfoResponseBase<Option<Empty>>;

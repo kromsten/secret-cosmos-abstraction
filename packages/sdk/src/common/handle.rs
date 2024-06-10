@@ -1,20 +1,20 @@
 use cosmwasm_schema::serde::de::DeserializeOwned;
 use cosmwasm_std::{Api, BlockInfo, Response, StdResult, Storage, StdError, ensure, from_binary, Binary};
 
-use crate::{crypto::wallets::{generate_secret_wallet, SecretEncryptingWallet}, traits::WithEncryption};
+use crate::{crypto::wallets::{generate_secret_wallet, SecretEncryptionWallet}, traits::WithEncryption};
 
 
 
 #[cfg(feature = "wallets")]
-pub fn reset_encyption_wallet(
+pub fn reset_encryption_wallet(
     api               :   &dyn Api,
     storage           :   &mut dyn Storage,
     block             :   &BlockInfo,
     password          :   Option<String>,
     hrp               :   Option<String>
-) -> StdResult<SecretEncryptingWallet> {
+) -> StdResult<SecretEncryptionWallet> {
 
-    let wallet : SecretEncryptingWallet = generate_secret_wallet(
+    let wallet : SecretEncryptionWallet = generate_secret_wallet(
         api, 
         block, 
         None, 
@@ -40,7 +40,7 @@ pub fn handle_reset_encyption_wallet(
     password          :   Option<String>,
     hrp               :   Option<String>
 ) -> StdResult<Response> {
-    reset_encyption_wallet(api, storage, block, password, hrp)?;
+    reset_encryption_wallet(api, storage, block, password, hrp)?;
 
     Ok(Response::new()
       .add_attribute("action", "reset_encryption_wallet")

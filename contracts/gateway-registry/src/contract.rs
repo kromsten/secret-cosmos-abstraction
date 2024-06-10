@@ -1,16 +1,18 @@
 use cosmwasm_std::{
     entry_point, Addr, DepsMut, Env, MessageInfo,
-    Response, Api, ensure,
+    Response, Api, ensure, Deps, StdResult, Binary, to_binary, Empty,
 };
 
 
-use secret_toolkit::utils::{pad_handle_result};
+use sdk::common::{ENCRYPTING_WALLET, BLOCK_SIZE};
+use secret_toolkit::utils::{pad_handle_result, pad_query_result};
 
 
 
 use crate::error::ContractError;
-use crate::msg::AdminMethods;
-use crate::state::{BLOCK_SIZE, ALLOWED_CODE_IDS, TEST};
+use crate::msg::{AdminMethods, QueryMsg};
+use crate::query;
+use crate::state::{ALLOWED_CODE_IDS, TEST};
 
 use crate::{
     msg::{
@@ -48,7 +50,7 @@ pub fn instantiate(
     ADMIN.save(deps.storage, &admin)?;
     ALLOWED_CODE_IDS.save(deps.storage, &msg.allowed_code_ids)?;
 
-    sdk::common::handle::reset_encyption_wallet(deps.api, deps.storage, &env.block, None, None)?;
+    sdk::common::reset_encryption_wallet(deps.api, deps.storage, &env.block, None, None)?;
 
     Ok(Response::new())
 }
@@ -62,7 +64,7 @@ pub fn execute(
     msg: ExecuteMsg,
 ) -> Result<Response, ContractError> {
     
-    let msg = sdk::common::handle::handle_encrypted_wrapper(deps.storage, msg)?;
+    let msg = sdk::common::handle_encrypted_wrapper(deps.storage, msg)?;
 
     let response = match msg {
         ExecuteMsg::Extension { msg } => {
@@ -78,4 +80,45 @@ pub fn execute(
         _ => todo!()
     };
     pad_handle_result(response, BLOCK_SIZE)
+}
+
+
+
+
+#[cfg_attr(not(feature = "library"), entry_point)]
+pub fn query(deps: Deps, env: Env, msg: QueryMsg) -> StdResult<Binary> {
+    let response = match msg {
+        QueryMsg::AccountInfo {
+            query
+        } =>  query::query_account_info(deps, query, None),
+
+        QueryMsg::AllowedCodeIds {} => to_binary(&ALLOWED_CODE_IDS.load(deps.storage)?),
+
+        QueryMsg::EncryptionKey {} =>  to_binary(&ENCRYPTING_WALLET.load(deps.storage)?.public_key),
+
+        QueryMsg::Extension { .. } =>  to_binary(&Empty {}),
+
+        _ => {
+            match msg {
+                QueryMsg::WithPermit { 
+                    permit, 
+                    hrp, 
+                    query 
+                } => query::query_with_permit(deps, env, permit, hrp, query),
+
+                QueryMsg::WithKey { 
+                    key, 
+                    query 
+                } => query::query_with_session(deps, env, key, query),
+
+                QueryMsg::WithAuthData { 
+                    auth_data, 
+                    query 
+                } => query::query_with_auth_data(deps, env, auth_data, query),
+
+                _ => unreachable!()
+             }
+        }
+    };
+    pad_query_result(response, BLOCK_SIZE)
 }

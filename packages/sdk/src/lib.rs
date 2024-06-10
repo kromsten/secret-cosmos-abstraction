@@ -106,16 +106,16 @@ pub struct CosmosProxyMsg
     Abs       =    AbstractionParams,
     Auth      =    CosmosAuthData, 
     Funds     =    FundForwarding, 
-    Ext       =    Option<Empty>
+    Ext       =    Empty
 > {
-    /// Parameters for abstract interaction settings.
-    pub abstraction_params          :       Abs,
     /// Authentication and authorization data.
     pub auth_data                   :       Auth,
+    /// Parameters for abstract interaction settings.
+    pub abstraction_params          :       Option<Abs>,
     /// Fund forwarding configuration.
     pub fund_forwarding             :       Option<Funds>,
     /// Optional extension to execute immediately after authentication.
-    pub extension                   :       Ext
+    pub extension                   :       Option<Ext>
 }
 
 

@@ -1,6 +1,6 @@
 use cosmwasm_schema::{serde::Serialize, schemars::JsonSchema};
 use cosmwasm_std::CustomMsg;
-use crate::{account::AccountExecuteMsg, registry::RegistryExecuteMsg, EncryptedParams};
+use crate::{EncryptedParams};
 
 
 pub const SCRT_DENOM: &str = "uscrt";
@@ -20,7 +20,7 @@ impl<I, A, C> WithEncryption for crate::account::AccountExecuteMsg<I, A, C>
 {
     fn encrypted(&self)     -> EncryptedParams {
         match self {
-            AccountExecuteMsg::Encrypted {
+            crate::account::AccountExecuteMsg::Encrypted {
                 msg,
                 nonce,
                 public_key
@@ -34,7 +34,7 @@ impl<I, A, C> WithEncryption for crate::account::AccountExecuteMsg<I, A, C>
     }
 
     fn is_encrypted(&self)  -> bool {
-        if let AccountExecuteMsg::Encrypted{..} = self {
+        if let crate::account::AccountExecuteMsg::Encrypted{..} = self {
             true
         } else {
             false
@@ -49,7 +49,7 @@ impl<E, C> WithEncryption for crate::registry::RegistryExecuteMsg<E, C>
 {
     fn encrypted(&self)     -> EncryptedParams {
         match self {
-            RegistryExecuteMsg::Encrypted {
+            crate::registry::RegistryExecuteMsg::Encrypted {
                 msg,
                 nonce,
                 public_key
@@ -63,10 +63,43 @@ impl<E, C> WithEncryption for crate::registry::RegistryExecuteMsg<E, C>
     }
 
     fn is_encrypted(&self)  -> bool {
-        if let RegistryExecuteMsg::Encrypted{..} = self {
+        if let crate::registry::RegistryExecuteMsg::Encrypted{..} = self {
             true
         } else {
             false
         }
     }
+}
+
+
+#[cfg(feature = "registry")]
+impl<I, A, Q, E> WithEncryption for crate::registry::RegistryQueryMsg<I, A, Q, E> 
+    where  I: JsonSchema + Clone + Serialize, 
+           A: JsonSchema + Serialize, 
+           E: JsonSchema + Serialize, 
+           Q: JsonSchema + Serialize
+{
+    fn encrypted(&self)     -> EncryptedParams {
+        match self {
+            crate::registry::RegistryQueryMsg::Encrypted {
+                query,
+                nonce,
+                public_key
+            } => EncryptedParams {
+                msg:   query.clone(),
+                nonce: nonce.clone(),
+                public_key: public_key.clone()
+            },
+            _ => panic!("This message is not encrypted")
+        }
+    }
+
+    fn is_encrypted(&self)  -> bool {
+        if let crate::registry::RegistryQueryMsg::Encrypted{..} = self {
+            true
+        } else {
+            false
+        }
+    }
+
 }
