@@ -1,8 +1,9 @@
 import { MsgExecuteContractParams, MsgInstantiateContractParams, MsgInstantiateContractResponse, TxResultCode } from "secretjs";
-import { AccountQuery, Contract, CosmosCredential, RegistryExecuteMsg, RegistryInitMsg, RegistryQueryMsg } from "./types";
+import { Contract, CosmosCredential, InnerMethods, InnerQueries, RegistryExecuteMsg, RegistryInitMsg, RegistryQueryMsg } from "./types";
 import { loadCodeConfig, loadContractConfig } from "./config";
 import { secretClient } from "./clients";
 import { SECRET_CHAIN_ID } from "./env";
+
 
 export const instantiateRegistry = async () : Promise<Contract> => {
     
@@ -78,55 +79,82 @@ export const createAccount = async (
 
     const tx = await secretClient.tx.compute.executeContract(msg, { gasLimit: 900_000 });
 
-    console.log("Create account tx: ", tx);
 
     return tx;
 }
 
 
-export const getAccountInfo = async (acc_query : AccountQuery) => {
+
+
+export const getGatewayRegistryEncryptionKey = async () => {
+    const res = await queryGatewayRegistry({ encryption_key: {} });
+    return res as string;
+}
+
+
+
+
+export const queryGatewayRegistry = async (query: RegistryQueryMsg) => {
     const config = loadContractConfig();
-
-    const query : RegistryQueryMsg = {
-        account_info: {
-            query: acc_query
-        }
-    }    
-
     const res = await secretClient.query.compute.queryContract({
         contract_address: config.registry!.address,
         code_hash: config.registry!.hash,
         query
     });
-
     return res;
 }
 
 
-export const getAccountInfoWithAuth = async (acc_query : AccountQuery, credentials: CosmosCredential[]) => {
-    const config = loadContractConfig();
-
-    const query : RegistryQueryMsg = {
+export const queryGatewayRegistryInner = (query: InnerQueries, credentials: CosmosCredential[]) => {
+    return queryGatewayRegistry({
         with_auth_data: {
-            query: acc_query,
+            query,
             auth_data: {
                 credentials,
             }
         }
-    }    
-
-    const res = await secretClient.query.compute.queryContract({
-        contract_address: config.registry!.address,
-        code_hash: config.registry!.hash,
-        query
-    });
-
-    return res;
+    })
 }
 
 
+export const executeGatewayRegistry = async (execute_msg: RegistryExecuteMsg) => {
+    const config = loadContractConfig();
+
+    const msg : MsgExecuteContractParams<RegistryExecuteMsg> = {
+        msg: execute_msg,
+        sender: secretClient.address,
+        contract_address: config.registry!.address,
+        code_hash: config.registry!.hash,
+        sent_funds: [],
+    }
+
+    const tx = await secretClient.tx.compute.executeContract(msg, { gasLimit: 900_000 });
+
+    console.log("Execute registry tx: ", tx);
+
+    return tx;
+}
 
 
+export const executeGatewayRegistryEncryptedInner = async (
+    execute_msg: InnerMethods, 
+    credentials: CosmosCredential[],
+    key?: string
+) => {
+
+    key ??= await getGatewayRegistryEncryptionKey();
+
+    /* 
+
+    return executeGatewayRegistry({
+        with_auth_data: {
+            execute: execute_msg,
+            auth_data: {
+                credentials,
+            }
+        }
+    }) */
+}
 
 
 

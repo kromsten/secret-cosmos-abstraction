@@ -10,7 +10,7 @@ use secret_toolkit::utils::{pad_handle_result, pad_query_result};
 
 
 use crate::error::ContractError;
-use crate::msg::{AdminMethods, QueryMsg};
+use crate::msg::{InnerMethods, QueryMsg};
 use crate::query;
 use crate::state::{ALLOWED_CODE_IDS, TEST};
 
@@ -44,11 +44,14 @@ pub fn instantiate(
     msg: InstantiateMsg,
 ) -> Result<Response, ContractError> {
     ensure_valid_init_msg(deps.api, &msg)?;
+    
     let admin = msg.admin
             .map(|a| Addr::unchecked(a))
             .unwrap_or(info.sender.clone());
+
     ADMIN.save(deps.storage, &admin)?;
     ALLOWED_CODE_IDS.save(deps.storage, &msg.allowed_code_ids)?;
+    TEST.save(deps.storage, &String::new())?;
 
     sdk::common::reset_encryption_wallet(deps.api, deps.storage, &env.block, None, None)?;
 
@@ -60,7 +63,7 @@ pub fn instantiate(
 pub fn execute(
     deps: DepsMut,
     _env: Env,
-    _info: MessageInfo,
+    info: MessageInfo,
     msg: ExecuteMsg,
 ) -> Result<Response, ContractError> {
     
@@ -68,7 +71,9 @@ pub fn execute(
 
     let response = match msg {
         ExecuteMsg::Extension { msg } => {
-            if let AdminMethods::Test { text } = msg {
+            if let InnerMethods::Test { text } = msg {
+                let admin = ADMIN.load(deps.storage)?;
+                ensure!(admin == info.sender, ContractError::Unauthorized {});
                 TEST.save(deps.storage, &text)?;
                 Ok(Response::default())
             } else {
@@ -106,10 +111,10 @@ pub fn query(deps: Deps, env: Env, msg: QueryMsg) -> StdResult<Binary> {
                     query 
                 } => query::query_with_permit(deps, env, permit, hrp, query),
 
-                QueryMsg::WithKey { 
+                /* QueryMsg::WithKey { 
                     key, 
                     query 
-                } => query::query_with_session(deps, env, key, query),
+                } => query::query_with_session(deps, env, key, query), */
 
                 QueryMsg::WithAuthData { 
                     auth_data, 

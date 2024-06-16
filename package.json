@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@noble/hashes": "^1.4.0",
+    "@solar-republic/neutrino": "^1.4.5",
     "cosmjs-types": "^0.9.0",
     "dotenv": "^16.4.5",
     "secretjs": "^1.12.5",

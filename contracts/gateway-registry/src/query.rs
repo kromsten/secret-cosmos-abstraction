@@ -7,7 +7,7 @@ use sdk::{common::PERMIT_PREFIX, CosmosAuthData, registry::{AccountInfoResponse,
 //use sdk::{session_key::{SessionKey, SessionKeyStore}, CosmosAuthData};
 use secret_toolkit::permit::Permit;
 
-use crate::{state::{ACCOUNTS, CREDENTIAL_IDS}, msg::InnerQueries};
+use crate::{state::{ACCOUNTS, CREDENTIAL_IDS, TEST}, msg::InnerQueries};
 //use shared::{storage::PERMIT_PREFIX, AccoundId};
 
 
@@ -17,9 +17,9 @@ pub fn query_with_permit(
     env         :   Env, 
     permit      :   Permit,
     hrp         :   Option<String>,
-    _query       :   InnerQueries
+    query       :   InnerQueries
 ) -> StdResult<Binary> {
-    let _address = secret_toolkit::permit::validate(
+    let address = secret_toolkit::permit::validate(
         deps, 
         PERMIT_PREFIX, 
         &permit, 
@@ -27,11 +27,24 @@ pub fn query_with_permit(
         hrp.as_deref()
     )?;
 
-    Ok(Binary::default())
-
+    query_inner(deps, env, address, query)
 }
 
 
+
+pub fn query_with_auth_data(
+    deps        :   Deps, 
+    env         :   Env, 
+    auth_data   :   CosmosAuthData,
+    query       :   InnerQueries
+) -> StdResult<Binary> {
+    auth_data.verify(deps.api)?;
+    let address = auth_data.primary_address(deps.api)?;
+    query_inner(deps, env,address, query)
+}
+
+
+/* 
 pub fn query_with_session(
     deps        :   Deps, 
     env         :   Env, 
@@ -39,33 +52,36 @@ pub fn query_with_session(
     query       :   InnerQueries   
 ) -> StdResult<Binary> {
     todo!()
-    /* let address = SessionKey::check(deps.storage, &env.block, &key)?;
+    let address = SessionKey::check(deps.storage, &env.block, &key)?;
     query_account_info(
         deps, 
         query, 
         Some(address)
     )
-    */
 } 
+*/
 
 
-pub fn query_with_auth_data(
+pub fn query_inner(
     deps        :   Deps, 
     _env        :   Env, 
-    auth_data   :   CosmosAuthData,
-    _query       :   InnerQueries
+    _auth_user   :   String,
+    query       :   InnerQueries
 ) -> StdResult<Binary> {
-    auth_data.verify(deps.api)?;
-    let _address = auth_data.primary_address(deps.api)?;
+
+    match query {
+        InnerQueries::Test {} => to_binary("test success"),
+        InnerQueries::TestText {} => to_binary(&TEST.load(deps.storage)?),
+    }
     
-    Ok(Binary::default())
 }
+
 
 
 pub fn query_account_info(
     deps        :   Deps, 
     query       :   CosmosAccountQuery,
-    _auth_user   :   Option<String>
+    _auth_user  :   Option<String>
 ) -> StdResult<Binary> {
 
     let account_id : u64  = match query {
@@ -73,7 +89,7 @@ pub fn query_account_info(
         CosmosAccountQuery::CredentialId(
             id
         ) => CREDENTIAL_IDS.get(deps.storage, &id.0)
-            .ok_or_else(|| StdError::NotFound { kind: "No account".into() })?,
+            .ok_or_else(|| StdError::NotFound { kind: "ProxyAccountInfo".into() })?,
         _ => {
             return Err(StdError::generic_err("Not supported"));
         }

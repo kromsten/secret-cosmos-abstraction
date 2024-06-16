@@ -125,19 +125,36 @@ export type AccountQuery = {
 }
 
 
+
+export type InnerMethods = 
+    { set_allowed_code_ids: { allowed_code_ids: number[] } }   |
+    { test: { text: string } }       
+
+
+
+export type InnerQueries = 
+    AccountQuery        |
+    { test_text: {} }   |
+    { test: {} }        
+
+
+
+
 export type RegistryExecuteMsg = 
 
     { create_account: CreateAccountMsg } |
 
     { reset_encryption_key: {} }         |
 
-    { extension: { msg: {} } }           |
+    { extension: { msg: InnerMethods } }           |
     
-    { encrypted: { msg: string, public_key: string, nonce: string, payload: string } } 
+    { encrypted: { msg: string, public_key: string, nonce: string } } 
     
 
 
 export type RegistryQueryMsg = 
+
+    AccountQuery                        |
 
     { encryption_key: {} }              |
 
@@ -148,18 +165,18 @@ export type RegistryQueryMsg =
     }}                                  |
 
     { with_permit: { 
-        query: AccountQuery, 
+        query: InnerQueries, 
         permit: Permit, 
         hrp?: string 
     }}                                  |
 
     { with_auth_data: { 
-        query: AccountQuery, 
+        query: InnerQueries, 
         auth_data: CosmosAuthData 
     }}                                  |
 
     { with_session_key: { 
-        query: AccountQuery, 
+        query: InnerQueries, 
         session_key: string 
     }}                                  
    
@@ -431,4 +448,13 @@ export type Snip20InitMsg = {
     config?             :   Snip20Config;
     admin?              :   string;
     supported_denoms?   :   string[];
+}
+
+
+
+export type GatewayMsg<P = any> = {
+    payload: P,
+    payload_hash: string,
+    payload_signature: string,
+    nonce: string,
 }

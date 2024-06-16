@@ -1,0 +1,489 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "RegistryExecuteMsg_for_InnerMethods_and_CosmosProxyMsg_for_AbstractionParams_and_CosmosAuthData_for_String_and_Nullable_Empty_and_Empty",
+  "oneOf": [
+    {
+      "description": "a message signaling that a separate proxy account should be created and the follow-up actions will be forwarded through it",
+      "type": "object",
+      "required": [
+        "create_account"
+      ],
+      "properties": {
+        "create_account": {
+          "$ref": "#/definitions/CreateAccountMsgBase_for_CosmosProxyMsg_for_AbstractionParams_and_CosmosAuthData_for_String_and_Nullable_Empty_and_Empty"
+        }
+      },
+      "additionalProperties": false
+    },
+    {
+      "description": "encrypted variant of this enum except for this variant itself",
+      "type": "object",
+      "required": [
+        "encrypted"
+      ],
+      "properties": {
+        "encrypted": {
+          "type": "object",
+          "required": [
+            "msg",
+            "nonce",
+            "public_key"
+          ],
+          "properties": {
+            "msg": {
+              "$ref": "#/definitions/Binary"
+            },
+            "nonce": {
+              "$ref": "#/definitions/Binary"
+            },
+            "public_key": {
+              "$ref": "#/definitions/Binary"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": [
+        "extension"
+      ],
+      "properties": {
+        "extension": {
+          "type": "object",
+          "required": [
+            "msg"
+          ],
+          "properties": {
+            "msg": {
+              "$ref": "#/definitions/InnerMethods"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  ],
+  "definitions": {
+    "AbstractionParams": {
+      "type": "object",
+      "properties": {
+        "fee_grant_amount": {
+          "description": "Amount of tokens to be granted to to a grantee",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Uint128"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "feegrant_address": {
+          "description": "secret address generated in background used to sign transactions meant to be passed so that a contract can give it a feegrant",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "generate_signing_wallet": {
+          "description": "whether to generate aseed for new wallet and gives it a grant as with feegrant_signer meant to be retrievable through authenticated queries. (default: true)",
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "session_config": {
+          "description": "Session key configuration that can be used to bypass need for supplying a signature can be retrieved through authenticated queries. (default: true)",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/SessionConfig"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "signing_wallet_password": {
+          "description": "password for genearing seed out of mnemonic phrase",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "Binary": {
+      "description": "Binary is a wrapper around Vec<u8> to add base64 de/serialization with serde. It also adds some helper methods to help encode inline.\n\nThis is only needed as serde-json-{core,wasm} has a horrible encoding for Vec<u8>. See also <https://github.com/CosmWasm/cosmwasm/blob/main/docs/MESSAGE_TYPES.md>.",
+      "type": "string"
+    },
+    "CosmosAuthData_for_String": {
+      "type": "object",
+      "required": [
+        "credentials"
+      ],
+      "properties": {
+        "credentials": {
+          "description": "Public key corresponding to the user's secret key used for signing.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CosmosCredential_for_String"
+          }
+        },
+        "primary_index": {
+          "description": "Index of the primary credential in the list",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint8",
+          "minimum": 0.0
+        }
+      },
+      "additionalProperties": false
+    },
+    "CosmosCredential_for_String": {
+      "type": "object",
+      "required": [
+        "message",
+        "pubkey",
+        "signature"
+      ],
+      "properties": {
+        "hrp": {
+          "description": "prefix for the bech32 address on remote cosmos chain",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "message": {
+          "description": "signed inner message before being wrapped with 036",
+          "type": "string"
+        },
+        "pubkey": {
+          "description": "public key matching the secret key used to sign transactions",
+          "allOf": [
+            {
+              "$ref": "#/definitions/Binary"
+            }
+          ]
+        },
+        "signature": {
+          "description": "signed sha256 digest of a message wrapped in arbitary data (036) object",
+          "allOf": [
+            {
+              "$ref": "#/definitions/Binary"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CosmosProxyMsg_for_AbstractionParams_and_CosmosAuthData_for_String_and_Nullable_Empty_and_Empty": {
+      "type": "object",
+      "required": [
+        "auth_data"
+      ],
+      "properties": {
+        "abstraction_params": {
+          "description": "Parameters for abstract interaction settings.",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/AbstractionParams"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "auth_data": {
+          "description": "Authentication and authorization data.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/CosmosAuthData_for_String"
+            }
+          ]
+        },
+        "extension": {
+          "description": "Optional extension to execute immediately after authentication.",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Empty"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fund_forwarding": {
+          "description": "Fund forwarding configuration.",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/Empty"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CreateAccountMsgBase_for_CosmosProxyMsg_for_AbstractionParams_and_CosmosAuthData_for_String_and_Nullable_Empty_and_Empty": {
+      "type": "object",
+      "required": [
+        "chain_id",
+        "code_id",
+        "msg"
+      ],
+      "properties": {
+        "chain_id": {
+          "description": "a chain id reserved for creating accounts on remote chains (e.g. through MPC or ICA)",
+          "type": "string"
+        },
+        "code_hash": {
+          "description": "a hash of the code id of a proxy account contract",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "code_id": {
+          "description": "a code id of a proxy account contract",
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0.0
+        },
+        "gas_target": {
+          "description": "optional number to set the gas target",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Uint64"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "label": {
+          "description": "optional label for the account",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "msg": {
+          "description": "additional payload to instantiate the proxy account contract",
+          "allOf": [
+            {
+              "$ref": "#/definitions/CosmosProxyMsg_for_AbstractionParams_and_CosmosAuthData_for_String_and_Nullable_Empty_and_Empty"
+            }
+          ]
+        },
+        "padding": {
+          "description": "optional ignored string to pad the message",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "Empty": {
+      "description": "An empty struct that serves as a placeholder in different places, such as contracts that don't set a custom message.\n\nIt is designed to be expressable in correct JSON and JSON Schema but contains no meaningful data. Previously we used enums without cases, but those cannot represented as valid JSON Schema (https://github.com/CosmWasm/cosmwasm/issues/451)",
+      "type": "object"
+    },
+    "Expiration": {
+      "description": "Expiration represents a point in time when some event happens. It can compare with a BlockInfo and will return is_expired() == true once the condition is hit (and for every block in the future)",
+      "oneOf": [
+        {
+          "description": "AtHeight will expire when `env.block.height` >= height",
+          "type": "object",
+          "required": [
+            "at_height"
+          ],
+          "properties": {
+            "at_height": {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0.0
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "description": "AtTime will expire when `env.block.time` >= time",
+          "type": "object",
+          "required": [
+            "at_time"
+          ],
+          "properties": {
+            "at_time": {
+              "$ref": "#/definitions/Timestamp"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "description": "Never will never expire. Used to express the empty variant",
+          "type": "object",
+          "required": [
+            "never"
+          ],
+          "properties": {
+            "never": {
+              "type": "object",
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "InnerMethods": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "reset_encryption_key"
+          ],
+          "properties": {
+            "reset_encryption_key": {
+              "type": "object",
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "set_allowed_code_ids"
+          ],
+          "properties": {
+            "set_allowed_code_ids": {
+              "type": "object",
+              "required": [
+                "allowed_code_ids"
+              ],
+              "properties": {
+                "allowed_code_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "format": "uint64",
+                    "minimum": 0.0
+                  }
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "set_admin"
+          ],
+          "properties": {
+            "set_admin": {
+              "type": "object",
+              "required": [
+                "admin"
+              ],
+              "properties": {
+                "admin": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "test"
+          ],
+          "properties": {
+            "test": {
+              "type": "object",
+              "required": [
+                "text"
+              ],
+              "properties": {
+                "text": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "SessionConfig": {
+      "type": "object",
+      "properties": {
+        "can_view": {
+          "description": "if true, the generated session key can be used as the viewing key for querying data",
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "expires": {
+          "description": "optional expiration object for the newly generated session key",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Expiration"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "generate_on_auth": {
+          "description": "if true, the contract generate a session key that can be used to bypass need for supplying a signature the rest of the fields are ignored if this is false (default: true)",
+          "type": [
+            "boolean",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "Timestamp": {
+      "description": "A point in time in nanosecond precision.\n\nThis type can represent times from 1970-01-01T00:00:00Z to 2554-07-21T23:34:33Z.\n\n## Examples\n\n``` # use secret_cosmwasm_std::Timestamp; let ts = Timestamp::from_nanos(1_000_000_202); assert_eq!(ts.nanos(), 1_000_000_202); assert_eq!(ts.seconds(), 1); assert_eq!(ts.subsec_nanos(), 202);\n\nlet ts = ts.plus_seconds(2); assert_eq!(ts.nanos(), 3_000_000_202); assert_eq!(ts.seconds(), 3); assert_eq!(ts.subsec_nanos(), 202); ```",
+      "allOf": [
+        {
+          "$ref": "#/definitions/Uint64"
+        }
+      ]
+    },
+    "Uint128": {
+      "description": "A thin wrapper around u128 that is using strings for JSON encoding/decoding, such that the full u128 range can be used for clients that convert JSON numbers to floats, like JavaScript and jq.\n\n# Examples\n\nUse `from` to create instances of this and `u128` to get the value out:\n\n``` # use secret_cosmwasm_std::Uint128; let a = Uint128::from(123u128); assert_eq!(a.u128(), 123);\n\nlet b = Uint128::from(42u64); assert_eq!(b.u128(), 42);\n\nlet c = Uint128::from(70u32); assert_eq!(c.u128(), 70); ```",
+      "type": "string"
+    },
+    "Uint64": {
+      "description": "A thin wrapper around u64 that is using strings for JSON encoding/decoding, such that the full u64 range can be used for clients that convert JSON numbers to floats, like JavaScript and jq.\n\n# Examples\n\nUse `from` to create instances of this and `u64` to get the value out:\n\n``` # use secret_cosmwasm_std::Uint64; let a = Uint64::from(42u64); assert_eq!(a.u64(), 42);\n\nlet b = Uint64::from(70u32); assert_eq!(b.u64(), 70); ```",
+      "type": "string"
+    }
+  }
+}

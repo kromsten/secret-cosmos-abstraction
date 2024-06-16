@@ -14,21 +14,22 @@ pub struct InstantiateMsg {
 
 
 #[cw_serde]
-pub enum AdminMethods {
-    SetAdmin            { admin: String },
-    SetAllowedCodeIds   { allowed_code_ids: Vec<u64> },
+pub enum InnerMethods {
     ResetEncryptionKey  { },
-    Test                { text: String }
+    SetAllowedCodeIds   { allowed_code_ids: Vec<u64> },
+    SetAdmin            { admin: String },
+    Test                { text: String },
 }
 
 
 
 #[cw_serde]
 pub enum InnerQueries {
-    Test {}
+    TestText {},
+    Test {},
 }
 
 
 
-pub type ExecuteMsg                 =   RegistryExecuteMsg<AdminMethods>;
+pub type ExecuteMsg                 =   RegistryExecuteMsg<InnerMethods>;
 pub type QueryMsg                   =   RegistryQueryMsg<InnerQueries>;
