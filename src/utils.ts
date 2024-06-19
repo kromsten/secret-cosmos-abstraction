@@ -1,5 +1,4 @@
 import { SecretNetworkClient } from "secretjs";
-import { InnerMethods, RegistryExecuteMsg } from "./types";
 
 
 export const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

@@ -1,14 +1,11 @@
 
-import { readFileSync, readdirSync } from "fs"
 import { sha256 } from "@noble/hashes/sha256";
+import { readFileSync, readdirSync } from "fs"
 import { toHex, MsgStoreCodeParams, TxResultCode } from "secretjs"
-import { codeConfigExists, codeConfigFileExists, contractConfigFileExists, loadCodeConfig, loadContractConfig, loadIbcConfig, saveCodeConfig, saveContractConfig } from "./config";
-import { secretClient } from "./clients";
+import { codeConfigExists, codeConfigFileExists, contractConfigFileExists, loadCodeConfig, loadContractConfig, saveCodeConfig, saveContractConfig } from "./config";
+import { instantiateGatewaySimple } from "./gateway";
 import { CodeConfig, ContractConfig } from "./types";
-import { SECRET_TOKEN } from "./env";
-import { instantiateRegistry } from "./registry";
-import { instantiateSnip20 } from "./snip20";
-import { sleep } from "./utils";
+import { secretClient } from "./clients";
 
 
 export const uploadContracts = async (
@@ -19,9 +16,7 @@ export const uploadContracts = async (
     const config : CodeConfig = codeConfigFileExists() ? loadCodeConfig() : {};
 
     for (const file of readdirSync(wasmDirPath).filter(f => f.includes(".wasm"))) {
-        if (file.includes("registry") && Boolean(config.registry)) continue;
-        if (file.includes("account") && Boolean(config.account)) continue;
-        if (file.includes("snip20") && Boolean(config.snip20)) continue;
+        if (file.includes("gateway") && Boolean(config.gateway)) continue;
 
         console.log(`Uploading contract: ${file}`);
 
@@ -49,13 +44,10 @@ export const uploadContracts = async (
             code_hash: codeHash
         }
 
-        if (file.includes("registry")) {
-            config.registry = contract
+        if (file.includes("gateway")) {
+            config.gateway = contract
         }
         
-        if (file.includes("account") ) {
-            config.account = contract
-        }
 
         if (file.includes("snip20")) {
             config.snip20 = contract
@@ -73,14 +65,14 @@ export const uploadContracts = async (
 export const instantiateContracts = async () => {
     const config : ContractConfig = contractConfigFileExists() 
             ? loadContractConfig() 
-            : { accounts: {} };
+            : {  };
     
-    if (!Boolean(config.sscrt)) {
+    /* if (!Boolean(config.sscrt)) {
         config.sscrt = await instantiateSnip20("Secret SCRT", "sSCRT", SECRET_TOKEN!);
         await sleep(1000);
         saveContractConfig(config);
-    }
+    } */
 
-    config.registry = await instantiateRegistry();
+    config.gateway = await instantiateGatewaySimple();
     saveContractConfig(config);
 }

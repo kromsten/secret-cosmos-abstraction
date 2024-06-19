@@ -1,7 +1,7 @@
 use cosmwasm_schema::serde::de::DeserializeOwned;
-use cosmwasm_std::{Api, BlockInfo, Response, StdResult, Storage, StdError, ensure, from_binary, Binary};
+use cosmwasm_std::{Api, BlockInfo, Response, StdResult, Storage, StdError, ensure, from_binary, MessageInfo, Addr};
 
-use crate::{crypto::wallets::{generate_secret_wallet, SecretEncryptionWallet}, traits::WithEncryption};
+use crate::{crypto::{wallets::{generate_secret_wallet, SecretEncryptionWallet}, verify_arbitrary}, traits::WithEncryption, CosmosCredential, common::NONCES};
 
 
 
@@ -50,26 +50,52 @@ pub fn handle_reset_encyption_wallet(
 
 
 pub fn handle_encrypted_wrapper<E>(
+    api     : &dyn Api,
     storage : &mut dyn Storage,
+    info    : MessageInfo,
     msg     : E
-) -> Result<E, StdError> 
+) -> Result<(E, MessageInfo), StdError> 
     where E: WithEncryption + DeserializeOwned 
 {
     if msg.is_encrypted() {
-        let wallet = super::storage::ENCRYPTING_WALLET.load(storage)?;
         let params = msg.encrypted();
-        let decrypted = wallet.decrypt_with(
-            &params.msg,
-            &params.public_key,
+
+        ensure!(
+            !NONCES.contains(storage, &params.nonce.0),
+            StdError::generic_err("Nonce already used")
+        );
+
+        let wallet = super::storage::ENCRYPTING_WALLET.load(storage)?;
+
+        let decrypted  = wallet.decrypt_to_payload(
+            &params.payload,
+            &params.user_key,
             &params.nonce,
         )?;
-        let inner_msg : E = from_binary(&Binary(decrypted))?;
+
+        let cred = CosmosCredential {
+            message : params.payload_hash,
+            signature  : params.payload_signature,
+            pubkey : decrypted.user_pubkey,
+            hrp : decrypted.hrp
+        };
+
+        NONCES.insert(storage, &params.nonce.0)?;
+
+        let sender = verify_arbitrary(api, &cred)?;
+
+        let inner_msg : E = from_binary(&decrypted.msg)?;
         ensure!(
-            !inner_msg.is_encrypted(), StdError::generic_err("Nested encryption is not allowed")
+            !inner_msg.is_encrypted(), 
+            StdError::generic_err("Nested encryption is not allowed")
         );
-        Ok(inner_msg)
+
+        Ok((inner_msg, MessageInfo {
+            sender: Addr::unchecked(sender),
+            funds: info.funds,
+        }))
     } else {
-        Ok(msg)
+        Ok((msg, info))
     }
    
 }

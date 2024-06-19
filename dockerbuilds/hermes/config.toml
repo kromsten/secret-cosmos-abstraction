@@ -93,7 +93,7 @@ port = 3001
 id = 'test-1'
 rpc_addr = 'http://localsecret:26657'
 grpc_addr = 'http://localsecret:9090'
-event_source = { mode = 'push', url = 'http://localsecret:26657/websocket', batch_delay = '200ms' }
+event_source = { mode = 'pull', url = 'http://localsecret:26657/websocket', batch_delay = '200ms' }
 rpc_timeout = '20s'
 account_prefix = 'secret'
 key_name = 'testkey_1'
@@ -115,7 +115,7 @@ address_type = { derivation = "cosmos" }
 id = 'test-2'
 rpc_addr = 'http://localsecret-2:26657'
 grpc_addr = 'http://localsecret-2:9090'
-event_source = { mode = 'push', url = 'http://localsecret-2:26657/websocket', batch_delay = '200ms' }
+event_source = { mode = 'pull', url = 'http://localsecret-2:26657/websocket', batch_delay = '200ms' }
 rpc_timeout = '20s'
 account_prefix = 'secret'
 key_name = 'testkey_2'

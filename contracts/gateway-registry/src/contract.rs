@@ -1,6 +1,6 @@
 use cosmwasm_std::{
-    entry_point, Addr, DepsMut, Env, MessageInfo,
-    Response, Api, ensure, Deps, StdResult, Binary, to_binary, Empty,
+    entry_point, DepsMut, Env, MessageInfo,
+    ensure, Response, Deps, StdResult, Binary, to_binary, Empty,
 };
 
 
@@ -12,7 +12,7 @@ use secret_toolkit::utils::{pad_handle_result, pad_query_result};
 use crate::error::ContractError;
 use crate::msg::{InnerMethods, QueryMsg};
 use crate::query;
-use crate::state::{ALLOWED_CODE_IDS, TEST};
+use crate::state::{SECRETS};
 
 use crate::{
     msg::{
@@ -25,16 +25,6 @@ use crate::{
 
 
 
-fn ensure_valid_init_msg(
-    api: &dyn Api,
-    msg: &InstantiateMsg
-) -> Result<(), ContractError> {
-    ensure!(msg.allowed_code_ids.len() > 0, ContractError::EmptyAllowedCodeIds {});
-    msg.admin.as_ref().map(|a|api.addr_validate(a)).transpose()?;
-    Ok(())
-}
-
-
 
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn instantiate(
@@ -43,17 +33,18 @@ pub fn instantiate(
     info: MessageInfo,
     msg: InstantiateMsg,
 ) -> Result<Response, ContractError> {
-    ensure_valid_init_msg(deps.api, &msg)?;
     
-    let admin = msg.admin
-            .map(|a| Addr::unchecked(a))
-            .unwrap_or(info.sender.clone());
+    ADMIN.save(
+        deps.storage,
+        &msg.admin
+        .map(|a| deps.api.addr_validate(&a))
+        .transpose()?
+        .unwrap_or(info.sender.clone())
+    )?;
 
-    ADMIN.save(deps.storage, &admin)?;
-    ALLOWED_CODE_IDS.save(deps.storage, &msg.allowed_code_ids)?;
-    TEST.save(deps.storage, &String::new())?;
-
-    sdk::common::reset_encryption_wallet(deps.api, deps.storage, &env.block, None, None)?;
+    sdk::common::reset_encryption_wallet(
+        deps.api, deps.storage, &env.block, None, None
+    )?;
 
     Ok(Response::new())
 }
@@ -62,27 +53,38 @@ pub fn instantiate(
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn execute(
     deps: DepsMut,
-    _env: Env,
+    env: Env,
     info: MessageInfo,
     msg: ExecuteMsg,
 ) -> Result<Response, ContractError> {
     
-    let msg = sdk::common::handle_encrypted_wrapper(deps.storage, msg)?;
+    let (
+        msg, 
+        info
+    ) = sdk::common::handle_encrypted_wrapper(
+        deps.api, deps.storage, info, msg
+    )?;
 
     let response = match msg {
+
+        ExecuteMsg::ResetEncryptionKey {  } => {
+            let admin = ADMIN.load(deps.storage)?;
+            ensure!(admin == info.sender, ContractError::Unauthorized {});
+            sdk::common::reset_encryption_wallet(
+                deps.api, deps.storage, &env.block, None, None
+            )?;
+            Ok(Response::default())
+        },
+
         ExecuteMsg::Extension { msg } => {
-            if let InnerMethods::Test { text } = msg {
-                let admin = ADMIN.load(deps.storage)?;
-                ensure!(admin == info.sender, ContractError::Unauthorized {});
-                TEST.save(deps.storage, &text)?;
-                Ok(Response::default())
-            } else {
-                unreachable!()
+            match msg {
+                InnerMethods::StoreSecret { text } => {
+                    SECRETS.insert(deps.storage, &info.sender.into_string(), &text)?;
+                    Ok(Response::default())
+                },
             }
-            
         },
         ExecuteMsg::Encrypted { .. } => unreachable!(),
-        _ => todo!()
     };
     pad_handle_result(response, BLOCK_SIZE)
 }
@@ -93,11 +95,6 @@ pub fn execute(
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn query(deps: Deps, env: Env, msg: QueryMsg) -> StdResult<Binary> {
     let response = match msg {
-        QueryMsg::AccountInfo {
-            query
-        } =>  query::query_account_info(deps, query, None),
-
-        QueryMsg::AllowedCodeIds {} => to_binary(&ALLOWED_CODE_IDS.load(deps.storage)?),
 
         QueryMsg::EncryptionKey {} =>  to_binary(&ENCRYPTING_WALLET.load(deps.storage)?.public_key),
 
@@ -111,10 +108,6 @@ pub fn query(deps: Deps, env: Env, msg: QueryMsg) -> StdResult<Binary> {
                     query 
                 } => query::query_with_permit(deps, env, permit, hrp, query),
 
-                /* QueryMsg::WithKey { 
-                    key, 
-                    query 
-                } => query::query_with_session(deps, env, key, query), */
 
                 QueryMsg::WithAuthData { 
                     auth_data, 

@@ -3,20 +3,15 @@ use std::fmt::Display;
 use cosmwasm_std::{ensure, Api, StdError, StdResult};
 
 use crate::{
-    crypto::{pubkey_to_canonical, verify_arbitrary, pubkey_to_address}, 
-    CosmosAuthData, CosmosCredential, SessionConfig
+    crypto::{verify_arbitrary, pubkey_to_address}, 
+    CosmosAuthData, CosmosCredential
 };
 
 
 impl<M : Display> CosmosCredential<M> {
 
-    pub fn address(&self, api : &dyn Api) -> StdResult<String> {
-        let addr = match self.hrp {
-            Some(ref hrp) => pubkey_to_address(&self.pubkey, hrp.as_str())?,
-            None => api.addr_humanize(
-                &pubkey_to_canonical(&self.pubkey)
-            )?.to_string()
-        };
+    pub fn address(&self, _ : &dyn Api) -> StdResult<String> {
+        let addr = pubkey_to_address(&self.pubkey, &self.hrp)?;
         Ok(addr)
     }
 
@@ -43,7 +38,7 @@ impl CosmosAuthData {
         self.credentials
             .iter()
             .map(|c| verify_arbitrary(api, c))
-            .collect::<StdResult<Vec<()>>>()?;
+            .collect::<StdResult<Vec<String>>>()?;
         Ok(())
     }
 
@@ -95,12 +90,3 @@ impl CosmosAuthData {
 
 
 
-impl Default for SessionConfig {
-    fn default() -> Self {
-        SessionConfig {
-            generate_on_auth: Some(true),
-            can_view: Some(true),
-            expires: None
-        }
-    }
-}

@@ -454,6 +454,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c8cbd1169bd7b4a0a20d92b9af7a7e0422888bd38a6f5ec29c1fd8c1558a272e"
 
 [[package]]
+name = "gateway-simple"
+version = "0.2.0"
+dependencies = [
+ "ca-sdk",
+ "cosmwasm-schema",
+ "secret-cosmwasm-std",
+ "secret-cosmwasm-storage",
+ "secret-toolkit",
+ "snafu",
+ "thiserror",
+]
+
+[[package]]
 name = "generic-array"
 version = "0.14.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -662,19 +675,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
 dependencies = [
  "getrandom",
-]
-
-[[package]]
-name = "registry"
-version = "0.0.1"
-dependencies = [
- "ca-sdk",
- "cosmwasm-schema",
- "secret-cosmwasm-std",
- "secret-cosmwasm-storage",
- "secret-toolkit",
- "snafu",
- "thiserror",
 ]
 
 [[package]]

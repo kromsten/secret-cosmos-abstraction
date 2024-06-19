@@ -1,4 +1,5 @@
-import { Coin, Permit } from "secretjs";
+import { AminoMsg } from "@cosmjs/amino";
+import { Permit } from "secretjs";
 
 export type Code = {
     code_id     :   number;
@@ -15,8 +16,7 @@ export type MultiContract = {
 
 
 export type CodeConfig = {
-    registry?    :   Code;
-    account?     :   Code;
+    gateway?     :   Code;
     snip20?      :   Code;
 }
 
@@ -27,11 +27,8 @@ export type Contract = {
 
 
 export type ContractConfig = {
-    registry?   :   Contract;
+    gateway?   :   Contract;
     sscrt?      :   Contract,
-    accounts    :   {
-        [name : string] : Contract
-    }
 }
 
 
@@ -77,92 +74,55 @@ export type SessionConfig = {
 }
 
 
-export type AbstractionParams = {
-    session_config?                 :   SessionConfig,
-    feegrant_address?               :   string,
-    fee_grant_amount?               :   string,
-    generate_signing_wallet?        :   boolean,
-    signing_wallet_password?        :   string,
-}
 
 
 
-
-export type CosmosProxyMsg = {
-    abstraction_params          :       AbstractionParams,
-    auth_data                   :       CosmosAuthData,
-    extension                   :       {}
-}
-
-
-
-export type CreateAccountMsg = {
-    code_id         :       number,
-    chain_id        :       string,
-    code_hash?      :       string,
-    padding?        :       string,
-    gas_target?     :       number,
-    label?          :       string
-    msg             :       CosmosProxyMsg
-}
-
-
-export type AccountInitMsg = CosmosProxyMsg
-
-
-export type RegistryInitMsg = {
-    allowed_code_ids         :       number[],
+export type GatewaySimpleInitMsg = {
     admin?                   :       string
 }
 
 
 
 
-export type AccountQuery = {
-    address?        :   string,
-    account_id?     :   string,
-    credential_id?  :   string,
-}
-
-
-
-export type InnerMethods = 
-    { set_allowed_code_ids: { allowed_code_ids: number[] } }   |
-    { test: { text: string } }       
+export type ExtendedMethods = 
+    { store_secret: { text: string } }       
 
 
 
 export type InnerQueries = 
-    AccountQuery        |
-    { test_text: {} }   |
+    { get_secret: {} }   |
     { test: {} }        
 
 
 
 
-export type RegistryExecuteMsg = 
-
-    { create_account: CreateAccountMsg } |
+export type GatewayExecuteMsg = 
 
     { reset_encryption_key: {} }         |
 
-    { extension: { msg: InnerMethods } }           |
+    { extension: { msg: ExtendedMethods } }           |
     
-    { encrypted: { msg: string, public_key: string, nonce: string } } 
+    { encrypted: { 
+        payload: string, 
+        payload_signature: string, 
+        payload_hash: string,
+        user_key: string,
+        nonce: string 
+    }} 
+    
+
+export type EncryptedPayload = {
+    user_address: string,
+    user_pubkey: string,
+    hrp: string,
+    msg: string
+}
     
 
 
-export type RegistryQueryMsg = 
-
-    AccountQuery                        |
+export type GatewayQueryMsg = 
 
     { encryption_key: {} }              |
-
-    { allowed_code_ids: {} }            |
-
-    { account_info: { 
-        query: AccountQuery 
-    }}                                  |
 
     { with_permit: { 
         query: InnerQueries, 
@@ -173,14 +133,10 @@ export type RegistryQueryMsg =
     { with_auth_data: { 
         query: InnerQueries, 
         auth_data: CosmosAuthData 
-    }}                                  |
-
-    { with_session_key: { 
-        query: InnerQueries, 
-        session_key: string 
     }}                                  
-   
 
+
+   /*  
 export type BankMsg = 
     {
         send: {
@@ -289,6 +245,7 @@ export type GovMsg = {
     };
 };
 
+
 export type WasmMsg = 
     {
         execute: {
@@ -334,127 +291,25 @@ export type CosmosMsg =
     { ibc: IbcMsg }             |
     { wasm: WasmMsg }           |
     { gov: GovMsg };
-
-
-export type CosmosAuthMsg =
-    { with_auth_data: {
-        auth_data: CosmosAuthData,
-        msgs: CosmosMsg[]
-    }}                                  |
-
-    { with_session_key: {
-        key: string,
-        msgs: CosmosMsg[]
-    }}                                  |
-
-    { encrypted: {
-        public_key: string,
-        msg: string,
-        nonce: string,
-        payload: string
-    }}                                  
-
-export type CustomCosmosMsg = CosmosMsg | { custom: CosmosAuthMsg }
-
-
-export type AccountMsg = 
-    { execute: { 
-        msgs: CosmosMsg[] 
-    }}                                      |   
-
-    { fee_grant: {
-        grantee: string,
-        allowance: BasicAllowance
-    }}                                      |
-
-    { reset_fee_grant_wallet: {
-        password?: string
-    }}                                      |
-
-    { reset_encryption_key: {}}             |
-
-    { create_viewing_key: {
-        entropy: string
-    }}                                      |
-
-    { set_viewing_key: {
-        key: string
-    }}                                      |
-
-    { create_proxy_viewing_key: {
-        contract: Contract,
-        entropy: string
-    }}                                      |
-
-    { set_proxy_viewing_key: {
-        contract: Contract,
-        key: string
-    }}                                      
-
-
-
-export type AccountExecuteMsg = 
-
-    { with_auth_data: {
-        auth_data   :   CosmosAuthData,
-        msg         :   AccountMsg,
-        padding?    :   string,
-        gas_target? :   string
-    }}                                      |
-
-    { with_session_key: {
-        msg         :   AccountMsg,
-        session_key :   string,
-        padding?    :   string,
-        gas_target? :   string
-    }}                                      |
-
-    { execute: { 
-        msgs        : CustomCosmosMsg[], 
-        gas_target? : string 
-    }}                                      |
-
-    { encrypted: { 
-        msg         :   string,
-        public_key  :   string,
-        nonce       :   string,
-        payload     :   string
-    }}                                      | 
-
-    { evaporate: { gas_target: string } }
-
-
-export type Balance = {
-    address: string;
-    amount: string;
-}
-
-export type Snip20Config = {
-    public_total_supply : boolean;
-    enable_deposit      : boolean;
-    enable_redeem       : boolean;
-    enable_mint         : boolean;
-    enable_burn         : boolean;
-    can_modify_denoms   : boolean;
-}
-
-
-export type Snip20InitMsg = {
-    name                :   string;
-    symbol              :   string;
-    decimals            :   number;
-    prng_seed           :   string;
-    initial_balances?   :   Balance[];
-    config?             :   Snip20Config;
-    admin?              :   string;
-    supported_denoms?   :   string[];
-}
+ */
 
 
 
 export type GatewayMsg<P = any> = {
+    signer: string,
     payload: P,
     payload_hash: string,
     payload_signature: string,
     nonce: string,
 }
+
+
+export interface MsgSignData extends AminoMsg {
+    readonly type: "sign/MsgSignData";
+    readonly value: {
+      /** Bech32 account address */
+      signer: string;
+      /** data to sign */
+      data: string;
+    };
+  }

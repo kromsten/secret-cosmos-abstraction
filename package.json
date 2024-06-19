@@ -4,9 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "test": "vitest --run"
+    "test": "vitest --run --testTimeout 60000"
   },
   "devDependencies": {
+    "@cosmjs/amino": "^0.32.3",
     "typescript": "^5.4.5",
     "vite": "^5.2.11"
   },

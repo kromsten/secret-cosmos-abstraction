@@ -12,15 +12,15 @@ export const IBC_CONFIG_PATH = `${CONFIG_DIR}/${IBC_FILE}`;
 
 
 export const loadCodeConfig = () : CodeConfig => {
-    return JSON.parse(readFileSync(CODE_CONFIG_PATH, 'utf8'));
+    return JSON.parse(readFileSync(CODE_CONFIG_PATH, 'utf8')) as CodeConfig;
 }
 
 export const loadContractConfig = () : ContractConfig => {
-    return JSON.parse(readFileSync(CONTRACT_CONFIG_PATH, 'utf8'));
+    return JSON.parse(readFileSync(CONTRACT_CONFIG_PATH, 'utf8')) as ContractConfig;
 }
 
 export const loadIbcConfig = () : IbcConfig => {
-    return JSON.parse(readFileSync(IBC_CONFIG_PATH, 'utf8'));
+    return JSON.parse(readFileSync(IBC_CONFIG_PATH, 'utf8')) as IbcConfig;
 }
 
 export const saveCodeConfig = (config : CodeConfig) : void => {
@@ -45,8 +45,9 @@ export const codeConfigFileExists = () : boolean => {
 export const codeConfigExists = () : boolean => {
     if (!existsSync(CODE_CONFIG_PATH)) return false;
     const config = loadCodeConfig();
-    return Boolean(config.registry) && Boolean(config.account) && Boolean(config.snip20);
+    return Boolean(config.gateway);
 }
+
 
 export const contractConfigFileExists = () : boolean => {
     return existsSync(CONTRACT_CONFIG_PATH);
@@ -54,9 +55,9 @@ export const contractConfigFileExists = () : boolean => {
 
 
 export const contractConfigExists = () : boolean => {
-    if (!existsSync(CONTRACT_CONFIG_PATH)) return false;
+    if (!contractConfigFileExists()) return false;
     const config = loadContractConfig();
-    return Boolean(config.registry) && Boolean(config.sscrt);
+    return Boolean(config.gateway)
 }
 
 

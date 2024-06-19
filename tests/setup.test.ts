@@ -28,16 +28,11 @@ describe('Env, IBC and Contract setup', () => {
         it("should be deployed", async () => {
             const codes = (await secretClient.query.compute.codes({})).code_infos!;
             expect(codes.length).toBeGreaterThan(0);
-            const registryCode = codes.find(c => 
-                Number(c.code_id!) == codeConfig.registry?.code_id &&
-                c.code_hash == codeConfig.registry.code_hash 
+            const gatewayCode = codes.find(c => 
+                Number(c.code_id!) == codeConfig.gateway?.code_id &&
+                c.code_hash == codeConfig.gateway.code_hash 
             );
-            const accountCode = codes.find(c =>
-                Number(c.code_id!) == codeConfig.account?.code_id &&
-                c.code_hash == codeConfig.account.code_hash
-            );
-            expect(registryCode).toBeDefined();
-            expect(accountCode).toBeDefined();
+            expect(gatewayCode).toBeDefined();
         })
 
         it("should have addresses", async () => {
@@ -45,15 +40,15 @@ describe('Env, IBC and Contract setup', () => {
             expect(contractConfigExists()).toBe(true);
             const codeConfig  = loadCodeConfig();
             const contracts = loadContractConfig();
-            expect(contracts.registry?.address).toBeDefined();
+            expect(contracts.gateway?.address).toBeDefined();
 
-            const registryContractInfos = await secretClient.query.compute.contractsByCodeId(
-                { code_id: codeConfig.registry!.code_id.toString() }
+            const gatewayContractInfos = await secretClient.query.compute.contractsByCodeId(
+                { code_id: codeConfig.gateway!.code_id.toString() }
             )
-            const registryContract = registryContractInfos.contract_infos?.find(
-                c => c.contract_address == contracts.registry?.address
+            const gatewayContract = gatewayContractInfos.contract_infos?.find(
+                c => c.contract_address == contracts.gateway?.address
             );
-            expect(registryContract).toBeDefined();
+            expect(gatewayContract).toBeDefined();
         })
     })
 

@@ -41,7 +41,7 @@ fn test_036_verification() {
         signature: Binary::from_base64(SIGNATURE).unwrap(),
         message: SIGNED_MSG,
         pubkey: Binary::from_base64(SIGNING_PUBKEY).unwrap(),
-        hrp: Some(SIGN_HRP.to_string())
+        hrp: SIGN_HRP.to_string()
     };
 
     assert!(verify_arbitrary(&deps.api, &cred).is_ok());
@@ -51,7 +51,7 @@ fn test_036_verification() {
         signature: Binary::from_base64("d3Jvbmc=").unwrap(),
         message: Binary::from_base64(SIGNED_MSG).unwrap(),
         pubkey: Binary::from_base64(SIGNING_PUBKEY).unwrap(),
-        hrp: Some(SIGN_HRP.to_string())
+        hrp: SIGN_HRP.to_string()
     };
     assert!(verify_arbitrary(&deps.api, &cred2).is_err());
 
@@ -61,7 +61,7 @@ fn test_036_verification() {
         signature: Binary::from_base64(SIGNATURE).unwrap(),
         message: Binary::from_base64("d3Jvbmc=").unwrap(),
         pubkey: Binary::from_base64(SIGNING_PUBKEY).unwrap(),
-        hrp: Some(SIGN_HRP.to_string())
+        hrp: SIGN_HRP.to_string()
     };
     assert!(verify_arbitrary(&deps.api, &cred3).is_err());
 
@@ -70,7 +70,7 @@ fn test_036_verification() {
         signature: Binary::from_base64(SIGNATURE).unwrap(),
         message: Binary::from_base64(SIGNED_MSG).unwrap(),
         pubkey: Binary::from_base64("d3Jvbmc=").unwrap(),
-        hrp: Some(SIGN_HRP.to_string())
+        hrp: SIGN_HRP.to_string()
     };
     assert!(verify_arbitrary(&deps.api, &cred4).is_err());
 
@@ -79,7 +79,7 @@ fn test_036_verification() {
         signature: Binary::from_base64(SIGNATURE).unwrap(),
         message: Binary::from_base64(SIGNED_MSG).unwrap(),
         pubkey: Binary::from_base64(SIGNING_PUBKEY).unwrap(),
-        hrp: Some("secret".to_string())
+        hrp: "secret".to_string()
     };
     assert!(verify_arbitrary(&deps.api, &cred5).is_err());
 }

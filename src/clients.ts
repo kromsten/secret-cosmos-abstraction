@@ -1,6 +1,8 @@
 import { SecretNetworkClient, Wallet } from "secretjs"
 import { 
     CONSUMER_CHAIN_ENDPOINT, CONSUMER_CHAIN_ID, CONSUMER_MNEMONIC, 
+    CONSUMER_PREFIX, 
+    CONSUMER_TOKEN, 
     SECRET_CHAIN_ENDPOINT, SECRET_CHAIN_ID, SECRET_MNEMONIC 
 } from "./env"
 
@@ -16,7 +18,10 @@ export const secretClient = new SecretNetworkClient({
 });
 
 
-export const consumerWallet = new Wallet(CONSUMER_MNEMONIC);
+export const consumerWallet = new Wallet(CONSUMER_MNEMONIC, {
+    bech32Prefix: CONSUMER_PREFIX,
+    coinType: CONSUMER_TOKEN == "uscrt" ? 529 : 118,
+});
 
 
 export const consumerClient = new SecretNetworkClient({

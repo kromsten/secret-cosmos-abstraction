@@ -1,26 +1,16 @@
-use cosmwasm_schema::cw_serde;
-use secret_toolkit::storage::Item;
+use secret_toolkit::{
+    storage::{Item, Keyset, KeysetBuilder, WithoutIter}, 
+    serialization::Bincode2
+};
 
 
 pub const BLOCK_SIZE: usize = 256;
-
 pub const PERMIT_PREFIX : &str = "permits";
 
-pub type  AccoundId         =    u64;
-pub type  CredentialId      =    Vec<u8>;
 
 
-#[cw_serde]
-pub struct ProxyAccountInfo {
-    pub user_id             :     String,
-    pub user_address        :     String,
-    pub code_id             :     u64,
-    pub code_hash           :     Option<String>,
-    // 
-    pub contract_address    :     String,
-    pub contract_code_hash  :     Option<String>,
-}
-
+pub const NONCES                :    Keyset<Vec<u8>, Bincode2, WithoutIter>    
+                                =    KeysetBuilder::new(b"cr_nonces").without_iter().build();
 
 
 #[cfg(feature = "wallets")]

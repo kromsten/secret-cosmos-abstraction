@@ -36,11 +36,13 @@ pub fn pubkey_to_canonical(pubkey: &[u8]) -> CanonicalAddr {
 
 /// Verifies an arbitrary message (036) using passed public key, signature
 /// and human readable prefix.
-pub fn verify_arbitrary<M : Display>(api:  &dyn Api, cred: &CosmosCredential<M>) -> StdResult<()> {
+pub fn verify_arbitrary<M : Display>(api:  &dyn Api, cred: &CosmosCredential<M>) -> StdResult<String> {
     
+    let address = cred.address(api)?;
+
     let digest = sha_256(
         &preamble_msg_arb_036(
-            cred.address(api)?.as_str(), 
+            &address,
             cred.message.to_string().as_str()
         ).as_bytes()
     );
@@ -55,7 +57,7 @@ pub fn verify_arbitrary<M : Display>(api:  &dyn Api, cred: &CosmosCredential<M>)
         return Err(StdError::generic_err("Signature verification failed"));
     }
 
-    Ok(())
+    Ok(address)
 }
 
 

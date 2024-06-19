@@ -18,14 +18,12 @@ const getIbcConnection = async () : Promise<string | undefined> => {
                 const clientConn = await secretClient.query.ibc_connection.clientConnections({
                     client_id: state.client_id
                 })
-                console.log("Client connection", clientConn)
                 if (clientConn.connection_paths?.length == 1) {
                     const connection_id = clientConn.connection_paths[0];
 
                     const conn = await secretClient.query.ibc_connection.connection({
                         connection_id
                     });
-                    console.log("Connection", conn)
                     
                     if (conn.connection?.state == 'STATE_OPEN') {
                         return connection_id
@@ -49,7 +47,6 @@ export const getIbcChannel = async ( connection? : string ) => {
 
 const setupIbc = async () => {
     const connection = await getIbcConnection();
-    console.log("Got connection", connection)
     const channel = await getIbcChannel(connection);
     if (!channel) return false;
 

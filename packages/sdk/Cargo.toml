@@ -6,12 +6,12 @@ edition = "2021"
 
 
 [features]
-default   = ["common", "registry", "account"]
+default   = ["common", "gateway"]
 common    = ["wallets"]
 wallets   = ["dep:bip32"]
 funds     = ["dep:serde-cw-value"]
-registry  = []
-account   = []
+gateway   = []
+
 
 [dependencies]
 cosmwasm-schema  = { workspace = true }

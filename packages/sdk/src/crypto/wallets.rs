@@ -3,9 +3,9 @@ use bip32::Mnemonic;
 use secp256k1::{PublicKey, SecretKey};
 use secret_toolkit::crypto::{sha_256, secp256k1::PrivateKey};
 use cosmwasm_schema::cw_serde;
-use cosmwasm_std::{Api, Binary, BlockInfo, StdError, StdResult};
+use cosmwasm_std::{Api, Binary, BlockInfo, StdError, StdResult, from_binary};
 
-use crate::crypto::{pubkey_to_address, pubkey_to_canonical};
+use crate::{crypto::{pubkey_to_address, pubkey_to_canonical}, EncryptedPayload};
 
 use super::{
     utils::{secret_key_from_bytes, public_key_from_bytes, get_common_key},
@@ -159,7 +159,7 @@ impl SecretEncryptionWallet {
         ))
     }
 
-    pub fn decrypt_with(
+    pub fn decrypt_bytes(
         &self,
         ciphertext      :   &impl Deref<Target = [u8]>,
         other_public    :   &impl Deref<Target = [u8]>,
@@ -172,5 +172,22 @@ impl SecretEncryptionWallet {
             &key,
             nonce
         )
+    }
+
+    pub fn decrypt_to_payload(
+        &self,
+        ciphertext      :   &impl Deref<Target = [u8]>,
+        other_public    :   &impl Deref<Target = [u8]>,
+        nonce           :   &impl Deref<Target = [u8]>,
+    ) -> StdResult<EncryptedPayload> {
+        let key  = self.decryption_key(other_public)?;
+
+        let decrypted = chacha20poly1305_decrypt(
+            ciphertext, 
+            &key,
+            nonce
+        )?;
+
+        from_binary(&Binary(decrypted))
     }
 }
