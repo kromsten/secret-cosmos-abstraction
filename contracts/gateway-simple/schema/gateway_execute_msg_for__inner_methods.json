@@ -1,0 +1,109 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GatewayExecuteMsg_for_InnerMethods",
+  "oneOf": [
+    {
+      "type": "object",
+      "required": [
+        "reset_encryption_key"
+      ],
+      "properties": {
+        "reset_encryption_key": {
+          "type": "object",
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    {
+      "description": "encrypted variant of this enum except for this variant itself",
+      "type": "object",
+      "required": [
+        "encrypted"
+      ],
+      "properties": {
+        "encrypted": {
+          "type": "object",
+          "required": [
+            "nonce",
+            "payload",
+            "payload_hash",
+            "payload_signature",
+            "user_key"
+          ],
+          "properties": {
+            "nonce": {
+              "$ref": "#/definitions/Binary"
+            },
+            "payload": {
+              "$ref": "#/definitions/Binary"
+            },
+            "payload_hash": {
+              "$ref": "#/definitions/Binary"
+            },
+            "payload_signature": {
+              "$ref": "#/definitions/Binary"
+            },
+            "user_key": {
+              "$ref": "#/definitions/Binary"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": [
+        "extension"
+      ],
+      "properties": {
+        "extension": {
+          "type": "object",
+          "required": [
+            "msg"
+          ],
+          "properties": {
+            "msg": {
+              "$ref": "#/definitions/InnerMethods"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  ],
+  "definitions": {
+    "Binary": {
+      "description": "Binary is a wrapper around Vec<u8> to add base64 de/serialization with serde. It also adds some helper methods to help encode inline.\n\nThis is only needed as serde-json-{core,wasm} has a horrible encoding for Vec<u8>. See also <https://github.com/CosmWasm/cosmwasm/blob/main/docs/MESSAGE_TYPES.md>.",
+      "type": "string"
+    },
+    "InnerMethods": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "store_secret"
+          ],
+          "properties": {
+            "store_secret": {
+              "type": "object",
+              "required": [
+                "text"
+              ],
+              "properties": {
+                "text": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    }
+  }
+}
