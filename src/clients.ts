@@ -11,8 +11,6 @@ const {
     SECRET_MNEMONIC 
 } = process.env;
 
-//import { gen_sk, sk_to_pk } from "@solar-republic/neutrino";
-
 
 export const secretWallet = new Wallet(SECRET_MNEMONIC);
 
@@ -23,6 +21,7 @@ export const secretClient = new SecretNetworkClient({
     wallet: secretWallet,
     walletAddress: secretWallet.address,
 });
+
 
 
 export const consumerWallet = new Wallet(CONSUMER_MNEMONIC, {
@@ -37,14 +36,3 @@ export const consumerClient = new SecretNetworkClient({
     wallet: consumerWallet,
     walletAddress: consumerWallet.address
 });
-
-
-
-
-/* export const clientWallet = (() => {
-    const privateKey = gen_sk(); 
-    const publicKey = sk_to_pk(privateKey);
-    return { privateKey, publicKey }
-})()
-
- */

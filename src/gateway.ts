@@ -80,7 +80,6 @@ export const executeGateway = async (execute_msg: GatewayExecuteMsg) => {
         sent_funds: [],
     }
     const tx = await secretClient.tx.compute.executeContract(msg, { gasLimit: 900_000 });
-    //console.log("Execute gateway tx: ", tx);
     return tx;
 }
 
