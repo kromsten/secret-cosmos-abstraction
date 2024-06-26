@@ -136,6 +136,7 @@ export type GatewayQueryMsg =
     }}                                  
 
 
+
    /*  
 export type BankMsg = 
     {

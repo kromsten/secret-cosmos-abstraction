@@ -386,10 +386,6 @@ npm install --save @cosmjs/cosmwasm-stargate
 
 
 
-### Query Client
-
-Before proceeding to encryption you might want to create a quering client that will be used for querying the state and contract of the Secret Network. At very least it is requited for fetching the public key of a gateway contract for deriving a shared key used later for encryption
-
 
 
 ### Generating Wallets
@@ -421,6 +417,49 @@ import { Wallet } from "secretjs";
 const { privateKey, publicKey } = new Wallet()
 ```
 
+### Query Client
+
+Before proceeding to encryption you might want to create a quering client that will be used for querying the state and contract of the Secret Network. At very least it is requited for fetching the public key of a gateway contract for deriving a shared key used later for encryption
+
+To perform a simple query on a secret contract we can use methods from `@solar-republic/neutrino`:
+
+```typescript 
+import { SecretContract } from "@solar-republic/neutrino"
+
+// create a contract instantse
+const contract = await SecretContract(
+    secretNodeEndpoint,
+    secretContractAddress
+)
+
+// query example:
+// get encryption key from a gateway contract
+const queryRes = await contract.query({ encryption_key: {} })
+
+
+// extract res value
+const gatewayPublicKey = queryRes[2]
+```
+
+
+For more persistent use-cases you can use `secretjs`
+
+```typescript 
+import { SecretNetworkClient } from "secretjs"
+
+// create a client:
+const client = new SecretNetworkClient({
+    chainId, 
+    url // endpoint URL of the node
+});
+
+// query the contact and get the value directly
+const gatewayPublicKey =  await client.query.compute.queryContract({
+    contract_address
+    code_hash, // optionally
+    { encryption_key: {} } // query msg
+});
+```
 
 ### Signatures
 
