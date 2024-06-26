@@ -18,6 +18,7 @@ metadata.csv
 
 # ENV
 .env
+.env.dev
 
 # Auto-gen
 .cargo-ok

@@ -34,5 +34,5 @@ export const consumerClient = new SecretNetworkClient({
     chainId: CONSUMER_CHAIN_ID!,
     url: CONSUMER_CHAIN_ENDPOINT!,
     wallet: consumerWallet,
-    walletAddress: consumerWallet.address
+    walletAddress: consumerWallet.address,
 });

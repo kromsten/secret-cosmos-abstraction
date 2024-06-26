@@ -36,7 +36,10 @@ export const sendIBCToken = async (
         source_channel,
         memo,
         timeout_timestamp: timeout_timestamp ?? String(Math.floor(Date.now()/1000) + 300)
-    }, { gasLimit: memo.length > 0 ? 400000 : 200000 })
+    }, { 
+        gasLimit: memo.length > 0 ? 400000 : 200000,
+        feeDenom: token
+    })
 
     //console.log("res:", res)
 

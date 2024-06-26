@@ -41,6 +41,7 @@ describe('Gateway contract interaction over IBC', () => {
                     secretGateway
                 )
             )
+            console.log("response", response)
             expect(response).toBeDefined();
             expect(response.code).toEqual(0);
 

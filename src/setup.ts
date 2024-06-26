@@ -14,7 +14,6 @@ const getIbcConnection = async () : Promise<string | undefined> => {
             const stateRes = state.client_state as ClientState;
             if (stateRes.chain_id == CONSUMER_CHAIN_ID
             ) {
-
                 const clientConn = await secretClient.query.ibc_connection.clientConnections({
                     client_id: state.client_id
                 })
@@ -24,7 +23,7 @@ const getIbcConnection = async () : Promise<string | undefined> => {
                     const conn = await secretClient.query.ibc_connection.connection({
                         connection_id
                     });
-                    
+
                     if (conn.connection?.state == 'STATE_OPEN') {
                         return connection_id
                     }
