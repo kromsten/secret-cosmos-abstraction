@@ -5,6 +5,7 @@ import {
     CONSUMER_TOKEN, 
     SECRET_CHAIN_ENDPOINT, SECRET_CHAIN_ID, SECRET_MNEMONIC 
 } from "./env"
+import { gen_sk, sk_to_pk } from "@solar-republic/neutrino";
 
 
 export const secretWallet = new Wallet(SECRET_MNEMONIC);
@@ -30,3 +31,13 @@ export const consumerClient = new SecretNetworkClient({
     wallet: consumerWallet,
     walletAddress: consumerWallet.address
 });
+
+
+
+
+export const clientWallet = (() => {
+    const privateKey = gen_sk(); 
+    const publicKey = sk_to_pk(privateKey);
+    return { privateKey, publicKey }
+})()
+

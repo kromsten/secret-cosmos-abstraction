@@ -14,4 +14,4 @@ pub const NONCES                :    Keyset<Vec<u8>, Bincode2, WithoutIter>
 
 
 #[cfg(feature = "wallets")]
-pub const ENCRYPTING_WALLET     :    Item<crate::crypto::wallets::SecretEncryptionWallet>   =    Item::new(b"ew");
+pub const ENCRYPTING_WALLET     :    Item<crate::crypto::wallets::SecretEncryptionWallet>   =    Item::new(b"enc_wallet");

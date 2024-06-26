@@ -1,9 +1,9 @@
 import { expect, describe, it, test, beforeAll } from 'vitest';
 import { executeGatewayEncrypted, getGatewayEncryptionKey, queryGatewayAuth } from '../src/gateway';
 import { consumerClient, consumerWallet, secretWallet } from '../src/clients';
-import { getArb36Credential } from '../src/crypto';
 import { gatewayChachaHookMemo, gatewayHookMemo, sendIBCToken } from '../src/ibc';
 import { loadContractConfig, loadIbcConfig } from '../src/config';
+import { getArb36Credential } from '../src/crypto';
 import { CONSUMER_TOKEN } from '../src/env';
 
 describe('Gateway contract interaction', () => {

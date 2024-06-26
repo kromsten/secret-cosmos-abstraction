@@ -1,23 +1,17 @@
-import { getRandomValues } from "crypto";
 import { consumerWallet } from "./clients";
 import { chacha20_poly1305_seal, ecdh } from "@solar-republic/neutrino"
-import { bytes, concat, json_to_bytes } from "@blake.regalia/belt";
+import { concat, json_to_bytes } from "@blake.regalia/belt";
 import { CosmosCredential, MsgSignData, GatewayExecuteMsg, EncryptedPayload } from "./types";
 import { getGatewayEncryptionKey } from "./gateway";
 
 
-import { makeSignDoc, OfflineAminoSigner, StdFee, StdTx, isSecp256k1Pubkey, serializeSignDoc, makeStdTx } from "@cosmjs/amino"
-import { Secp256k1, Secp256k1Signature } from "@cosmjs/crypto"
+import { 
+  makeSignDoc, OfflineAminoSigner, StdTx, 
+  isSecp256k1Pubkey, serializeSignDoc, makeStdTx, StdSignDoc, 
+} from "@cosmjs/amino"
+import { Random, Secp256k1, Secp256k1Signature, sha256 } from "@cosmjs/crypto"
 import { fromBase64, toBase64, toAscii } from "@cosmjs/encoding";
-import { AminoWallet, StdSignDoc } from "secretjs/dist/wallet_amino";
-import { sha256 } from "@noble/hashes/sha256";
-
-
-const accountNumber = 0;
-const sequence = 0;
-const chainId = "";
-const fee: StdFee = { gas: "0", amount: [] };
-const memo = "";
+import { AminoWallet } from "secretjs/dist/wallet_amino";
 
 
 
@@ -35,10 +29,10 @@ export const getEncryptedSignedMsg = async (
   const signerAddress = firstAccount.address;
   const signerPubkey = firstAccount.pubkey;
 
-  const nonce            =  getRandomValues(bytes(12))
+  const nonce            =  Random.getBytes(12)
   const gatewayKeyBytes  =  fromBase64(gatewayKey);
 
-  const sharedKey =  sha256(
+  const sharedKey : Uint8Array =  sha256(
     ecdh(consumerWallet.privateKey, gatewayKeyBytes)
   )
   
@@ -48,15 +42,14 @@ export const getEncryptedSignedMsg = async (
     hrp: signerAddress.split("1")[0],
     msg: toBase64(json_to_bytes(msg))
   }
-  
 
-  const [ciphertextClient, tagClient] = chacha20_poly1305_seal(
+
+  const ciphertext = concat(chacha20_poly1305_seal(
     sharedKey,
     nonce,
-    json_to_bytes(payload)
-  )
+    json_to_bytes(payload )
+  ));
 
-  const ciphertext = concat([ciphertextClient, tagClient]);
   const ciphertextHash = sha256(ciphertext);
 
   const signDoc = getArb36SignDoc(signerAddress, ciphertextHash);
@@ -96,10 +89,10 @@ export const getArb36SignData = (
 
 export const getArb36SignDoc = (
   signerAddress: string,
-  data: Uint8Array,
+  data: string | Uint8Array,
 ) : StdSignDoc => {
   const msg = getArb36SignData(signerAddress, data);
-  return makeSignDoc([msg], fee, chainId, memo, accountNumber, sequence);
+  return makeSignDoc([msg], { gas: "0", amount: [] }, "", "", 0, 0);
 }
 
 

@@ -21,12 +21,14 @@ then
 
   export SECRET_NETWORK_CHAIN_ID="$chain_id"
   export SECRET_NETWORK_KEYRING_BACKEND=test
+
+  export DENOM=${DENOM:-uscrt}
   
   secretd init banana --chain-id "$chain_id"
 
 
   cp ~/node_key.json ~/.secretd/config/node_key.json
-  perl -i -pe 's/"stake"/"uscrt"/g' ~/.secretd/config/genesis.json
+  perl -i -pe 's/"stake"/"'$DENOM'"/g' ~/.secretd/config/genesis.json
   perl -i -pe 's/"172800s"/"90s"/g' ~/.secretd/config/genesis.json # voting period 2 days -> 90 seconds
   #perl -i -pe 's/"1814400s"/"80s"/g' ~/.secretd/config/genesis.json # unbonding period 21 days -> 80 seconds
 
@@ -42,12 +44,12 @@ then
   echo $c_mnemonic | secretd keys add c --recover
   echo $d_mnemonic | secretd keys add d --recover
 
-  secretd add-genesis-account "$(secretd keys show -a a)" 1000000000000000000uscrt
-  secretd add-genesis-account "$(secretd keys show -a b)" 1000000000000000000uscrt
-  secretd add-genesis-account "$(secretd keys show -a c)" 1000000000000000000uscrt
-  secretd add-genesis-account "$(secretd keys show -a d)" 1000000000000000000uscrt
+  secretd add-genesis-account "$(secretd keys show -a a)" 1000000000000000000${DENOM}
+  secretd add-genesis-account "$(secretd keys show -a b)" 1000000000000000000${DENOM}
+  secretd add-genesis-account "$(secretd keys show -a c)" 1000000000000000000${DENOM}
+  secretd add-genesis-account "$(secretd keys show -a d)" 1000000000000000000${DENOM}
 
-  secretd gentx a 1000000uscrt --chain-id "$chain_id"
+  secretd gentx a 1000000${DENOM} --chain-id "$chain_id"
 
   secretd collect-gentxs
   secretd validate-genesis

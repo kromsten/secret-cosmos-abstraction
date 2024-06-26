@@ -63,8 +63,8 @@ pub fn verify_arbitrary<M : Display>(api:  &dyn Api, cred: &CosmosCredential<M>)
 
 
 
-
-
+/// Decrypts a plaintext message using the ChaCha20Poly1305 algorithm.
+/// and returns the plaintext bytes.
 pub fn chacha20poly1305_decrypt(
     ciphertext    :     &impl Deref<Target = [u8]>,
     key           :     &impl Deref<Target = [u8]>,

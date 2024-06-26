@@ -1,4 +1,4 @@
-use crate::{CosmosAuthData};
+use crate::CosmosAuthData;
 use cosmwasm_schema::{cw_serde, schemars::JsonSchema, serde::Serialize};
 use cosmwasm_std::{Binary, Empty};
 use secret_toolkit::permit::Permit;

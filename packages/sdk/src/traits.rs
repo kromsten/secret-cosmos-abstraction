@@ -1,5 +1,5 @@
 use cosmwasm_schema::{serde::Serialize, schemars::JsonSchema};
-use crate::{EncryptedParams};
+use crate::EncryptedParams;
 
 
 pub const SCRT_DENOM: &str = "uscrt";
