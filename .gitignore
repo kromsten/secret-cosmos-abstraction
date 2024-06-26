@@ -61,4 +61,4 @@ dist-ssr
 *.sln
 *.sw?
 
-configs/co*.json
+configs/*_back.json
