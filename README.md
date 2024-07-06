@@ -471,11 +471,17 @@ Most of the Cosmos wallets provide a method for signing arbitrary messages follo
 
 Here is a definition taken from documentation of [Keplr wallet](https://docs.keplr.app/api/#request-signature-for-arbitrary-message):
 
+
 ```typescript 
 // window.keplr.signArbi....
 signArbitrary(chainId: string, signer: string, data: string | Uint8Array) : Promise<StdSignature>
 ```
 Although the API method requires a `chainId` it is set to empty string before signing the message
+
+##### Cosmology
+
+Cosmology [defines](https://docs.cosmology.zone/cosmos-kit/hooks/use-chain-wallet#methods-from-wallet-client) `signArbitrary` method as part of the interface for their wallet client and provides implementation / intergration for every popular Cosmos wallet out there
+
 
 #### CosmJS
 
