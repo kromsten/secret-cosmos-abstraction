@@ -27,6 +27,8 @@ overflow-checks = true
 
 [features]
 default = []
+library = []
+
 # for quicker tests, cargo test --lib
 # for more explicit tests, cargo test --features=backtraces
 #backtraces = ["cosmwasm-std/backtraces"]

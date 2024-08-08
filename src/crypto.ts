@@ -1,17 +1,17 @@
-import { consumerWallet } from "./clients";
-import { chacha20_poly1305_seal, ecdh } from "@solar-republic/neutrino"
-import { concat, json_to_bytes } from "@blake.regalia/belt";
-import { CosmosCredential, MsgSignData, GatewayExecuteMsg, EncryptedPayload } from "./types";
-import { getGatewayEncryptionKey } from "./gateway";
 
 
 import { 
   makeSignDoc, OfflineAminoSigner, StdTx, 
   isSecp256k1Pubkey, serializeSignDoc, makeStdTx, StdSignDoc, 
 } from "@cosmjs/amino"
-import { Random, Secp256k1, Secp256k1Signature, sha256 } from "@cosmjs/crypto"
-import { fromBase64, toBase64, toAscii } from "@cosmjs/encoding";
 import { AminoWallet } from "secretjs/dist/wallet_amino";
+import { getNonceWallet } from "./clients";
+import { concat, json_to_bytes } from "@blake.regalia/belt";
+import { fromBase64, toBase64, toAscii } from "@cosmjs/encoding";
+import { chacha20_poly1305_seal, ecdh } from "@solar-republic/neutrino"
+import { Random, Secp256k1, Secp256k1Signature, sha256 } from "@cosmjs/crypto"
+import { CosmosCredential, MsgSignData, GatewayExecuteMsg, EncryptedPayload } from "./types";
+import { getGatewayEncryptionKey } from "./gateway";
 
 
 
@@ -30,10 +30,14 @@ export const getEncryptedSignedMsg = async (
   const signerPubkey = firstAccount.pubkey;
 
   const nonce            =  Random.getBytes(12)
+  const nonceBase64      =  toBase64(nonce);
   const gatewayKeyBytes  =  fromBase64(gatewayKey);
 
+
+  const nonceWallet = await getNonceWallet(nonceBase64);
+  
   const sharedKey : Uint8Array =  sha256(
-    ecdh(consumerWallet.privateKey, gatewayKeyBytes)
+    ecdh(await nonceWallet.privateKey, gatewayKeyBytes)
   )
   
   const payload : EncryptedPayload = {
@@ -64,8 +68,8 @@ export const getEncryptedSignedMsg = async (
 
   return {
     encrypted: {
-      nonce           :     toBase64(nonce),
-      user_key        :     toBase64(consumerWallet.publicKey),
+      nonce           :     nonceBase64,
+      user_key        :     toBase64(await nonceWallet.publicKey),
       payload         :     toBase64(ciphertext),
       payload_hash    :     toBase64(ciphertextHash),
       payload_signature:    signRes.signature.signature,

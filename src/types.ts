@@ -1,6 +1,7 @@
 import { AminoMsg } from "@cosmjs/amino";
 import { Permit } from "secretjs";
 
+
 export type Code = {
     code_id     :   number;
     code_hash   :   string;
@@ -154,4 +155,25 @@ export interface MsgSignData extends AminoMsg {
       /** data to sign */
       data: string;
     };
-  }
+}
+
+import { gen_sk, sk_to_pk } from "@solar-republic/neutrino"
+
+
+export class NonceWallet {
+    private private : Uint8Array;
+    private public  : Uint8Array;
+
+    constructor() { 
+        this.private = gen_sk();
+        this.public = sk_to_pk(this.private);
+    }
+
+    get privateKey() {
+        return this.private;
+    }
+
+    get publicKey() {
+        return this.public;
+    }
+}

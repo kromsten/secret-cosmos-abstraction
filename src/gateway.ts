@@ -1,7 +1,7 @@
 import { MsgExecuteContractParams, MsgInstantiateContractParams, MsgInstantiateContractResponse, TxResultCode } from "secretjs";
 import { Contract, CosmosCredential, InnerQueries, GatewayExecuteMsg as GatewayExecuteMsg, GatewaySimpleInitMsg, GatewayQueryMsg } from "./types";
 import { loadCodeConfig, loadContractConfig } from "./config";
-import { consumerWallet, secretClient } from "./clients";
+import { getConsumerWallet, secretClient } from "./clients";
 import { getEncryptedSignedMsg } from "./crypto";
 import { OfflineAminoSigner } from "@cosmjs/amino";
 import { AminoWallet } from "secretjs/dist/wallet_amino";
@@ -71,7 +71,6 @@ export const queryGatewayAuth = (query: InnerQueries, credentials: CosmosCredent
 
 export const executeGateway = async (execute_msg: GatewayExecuteMsg) => {
     const config = loadContractConfig();
-
     const msg : MsgExecuteContractParams<GatewayExecuteMsg> = {
         msg: execute_msg,
         sender: secretClient.address,
@@ -93,7 +92,7 @@ export const executeGatewayEncrypted = async (
 
     return await executeGateway(
         await getEncryptedSignedMsg(
-            wallet ?? consumerWallet,
+            wallet ?? await getConsumerWallet(),
             execute_msg,
             gatewayKey
         )

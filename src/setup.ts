@@ -9,6 +9,7 @@ import { ClientState } from 'secretjs/src/protobuf/ibc/lightclients/tendermint/v
 
 const getIbcConnection = async () : Promise<string | undefined> => {
     const secretStates  = (await secretClient.query.ibc_client.clientStates({})).client_states!;
+    console.log("states", secretStates)
     for (const state of secretStates.reverse()) {
         try {
             const stateRes = state.client_state as ClientState;
@@ -17,6 +18,7 @@ const getIbcConnection = async () : Promise<string | undefined> => {
                 const clientConn = await secretClient.query.ibc_connection.clientConnections({
                     client_id: state.client_id
                 })
+                console.log("clientConn", clientConn)
                 if (clientConn.connection_paths?.length == 1) {
                     const connection_id = clientConn.connection_paths[0];
 

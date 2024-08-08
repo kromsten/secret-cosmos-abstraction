@@ -1,22 +1,26 @@
 import { expect, describe, it, beforeAll } from 'vitest';
 import { executeGatewayEncrypted, getGatewayEncryptionKey, queryGatewayAuth } from '../src/gateway';
-import { consumerWallet, secretWallet } from '../src/clients';
+import { getConsumerWallet, secretWallet } from '../src/clients';
 import { getArb36Credential } from '../src/crypto';
+
+
+let gatewayKey : string | undefined;
+
+beforeAll(async () => {
+    gatewayKey = await getGatewayEncryptionKey();
+});
+
 
 describe('Gateway contract interaction', () => {
 
-    let gatewayKey : string | undefined;
-
-    beforeAll(async () => {
-        gatewayKey = await getGatewayEncryptionKey();
-        console.log("Gateway key:", gatewayKey)
-    });
-    
 
     describe('setting secret encrypted text', async () => {
         // simply signing a 036 message withour encryption
         // only for queries (no replay-attack protection)
-        const consumerQueryCredential = await getArb36Credential(consumerWallet, "data")
+        const signerWallet = await getConsumerWallet();
+
+        const consumerQueryCredential = await getArb36Credential(signerWallet, "data")
+
         const secretQueryCredential = await getArb36Credential(secretWallet, "data")
 
         it('should be able to to set secret texts', async () => {
@@ -29,12 +33,12 @@ describe('Gateway contract interaction', () => {
 
             const new_text = "new_text_" + Math.random().toString(36).substring(7);
             expect(old_text).not.toEqual(new_text);
-            
+
             // called with regular  authentication + encryption 
             // regular secret wallet relaying the message
             await executeGatewayEncrypted(
                 { extension: { msg: { store_secret: { text: new_text } } } },
-                consumerWallet,
+                signerWallet,
                 gatewayKey
             )
             
@@ -53,7 +57,6 @@ describe('Gateway contract interaction', () => {
                 [consumerQueryCredential]
             )) as string;
             expect(updated_text).toEqual(new_text);
-
 
             // the secret wallet can pass it's own credentials
             // but can only access a secret text of it's own
